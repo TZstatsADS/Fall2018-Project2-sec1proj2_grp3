@@ -19,7 +19,12 @@ library(tidyr)
 library(dplyr)
 library(ggplot2)
 
-
+#####
+load("../output/price.RData")
+load("../output/avg_price_zip.RData")
+load("../output/subdat.RData")
+rank_all <- read.csv("../data/rank_all.csv",as.is = T)
+########
 load("../output/markets.RData")
 load("../output/sub.station.RData")
 load("../output/bus.stop.RData")
@@ -45,7 +50,88 @@ pal <- colorBin(color[[1]], bins = bin[[1]])
 
 
 shinyServer(function(input, output,session) {
+  #################################################################
+  ##### Panel 1 : summary  ########################################
+  #################################################################
+  output$map1 <- renderLeaflet({
+    leaflet()%>%
+      setView(lng = -73.98928, lat = 40.75042, zoom = 13)%>%
+      addProviderTiles("Stamen.TonerLite")
+    
+  })
   
+  ## Panel *: heat map###########################################
+  # ----- set uo color pallette https://rstudio.github.io/leaflet/colors.html
+  # Create a continuous palette function
+  pal <- colorNumeric(
+    palette = "Reds",
+    domain = subdat$value
+  )
+  leafletProxy("map1",data=subdat)%>%
+    addPolygons(layerId = ~ZIPCODE,
+                stroke = T, weight=1,
+                fillOpacity = 0.95,
+                color = ~pal(value),
+                highlightOptions = highlightOptions(color='#ff0000', opacity = 0.5, weight = 4, fillOpacity = 0.9,
+                                                    bringToFront = TRUE, sendToBack = TRUE))%>%
+    addLegend(pal = pal, values = ~value, opacity = 1)
+  
+  
+  ## Panel *: click on any area, popup text about this zipcode area's information#########
+  observeEvent(input$map1_shape_click, {
+    ## track
+    if(input$click_multi == FALSE) leafletProxy('map1') %>%clearGroup("click")
+    click <- input$map1_shape_click
+    leafletProxy('map1')%>%
+      addMarkers(click$lng, click$lat, group="click", icon=list(iconUrl='icon/leaves.png',iconSize=c(60,60)))
+    
+    ##info
+    
+    #####*********#####
+    zip_sel<-as.character(revgeocode(as.numeric(c(click$lng,click$lat)),output="more")$postal_code)
+    zip<-paste("ZIPCODE: ",zip_sel)
+    price_avg<-paste("Average Price: $",avg_price_zip.df[avg_price_zip.df$region==zip_sel,"value"],sep="")
+    studio_avg<-paste("Studio: $",price[price$region==zip_sel&price$type=="Studio","avg"],sep="")
+    OneB_avg<-paste("1B: $",price[price$region==zip_sel&price$type=="OneBedroom","avg"],sep="")
+    TwoB_avg<-paste("2B: $",price[price$region==zip_sel&price$type=="TwoBedroom","avg"],sep="")
+    ThreeB_avg<-paste("3B: $",price[price$region==zip_sel&price$type=="ThreeBedroom","avg"],sep="")
+    FourB_avg<-paste("4B: $",price[price$region==zip_sel&price$type=="fOURbEDROOM","avg"],sep="")
+    transportation_rank<-paste("Transportation Rank: ",rank_all[rank_all$zipcode==zip_sel,"ranking.trans"],sep="")
+    amenities_rank<-paste("Amenities Rank: ",rank_all[rank_all$zipcode==zip_sel,"ranking.amenities"],sep="")
+    crime_rank<-paste("Crime Rank: ",rank_all[rank_all$zipcode==zip_sel,"ranking.crime"],sep="")
+    
+    leafletProxy("map1")%>%
+      setView(click$lng,click$lat,zoom=14,options=list(animate=TRUE))
+    
+    output$zip_text<-renderText({zip})
+    output$avgprice_text<-renderText({price_avg})
+    output$avgstudio_text<-renderText({studio_avg})
+    output$avg1b_text<-renderText(({OneB_avg}))
+    output$avg2b_text<-renderText(({TwoB_avg}))
+    output$avg3b_text<-renderText(({ThreeB_avg}))
+    output$avg4b_text<-renderText(({FourB_avg}))
+    output$transportation_text<-renderText({transportation_rank})
+    output$amenities_text<-renderText({amenities_rank})
+    output$crime_text<-renderText({crime_rank})
+  })
+  
+  ## Panel *: Return to big view##################################
+  observeEvent(input$click_reset_buttom,{
+    if(input$click_reset_buttom){
+      leafletProxy("map1")%>%
+        setView(lng = -73.98928, lat = 40.75042, zoom = 13)%>% 
+        clearPopups()
+    }
+  })
+  
+  ## Panel 1: to panel 2
+  observeEvent(input$click_jump_next,{
+    if(input$click_jump_next){
+      updateTabsetPanel(session, "inTabset",selected = "Housing Explorer")
+    }
+  })
+  
+    
   #Esri.WorldTopoMap
   #########main map######
   output$map <- renderLeaflet({

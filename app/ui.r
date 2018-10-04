@@ -19,12 +19,42 @@ shinyUI(
   
   
   fluidPage(includeCSS("style.css"),
-            navbarPage("Manhattan Off-Campus Housing",
+            navbarPage(p(class="h","Manhattan Off-Campus Housing"),id = "inTabset",
                        #theme=shinythemes::shinytheme("spacelab"),
                        fluid=T,
                        
                        #####################################1. Home##############################################           
-                       
+                       tabPanel("All about map",
+                                div(class="outer",
+                                    tags$style(type = "text/css", ".outer {position: fixed; top: 41px; left: 0; right: 0; bottom: 0; overflow: hidden; padding: 0}"),
+                                    leafletOutput("map1", width = "120%", height = "120%"),
+                                    absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE, draggable = FALSE,
+                                                  top = 100, left = 10, height = "auto",width = 243,
+                                                  h2("All about Map",align="center"),
+                                                  hr(),
+                                                  h3("Click a Place on the Heatmap",align="center"),
+                                                  hr(),
+                                                  h4(textOutput("zip_text"),align="left"),
+                                                  h4(textOutput("avgprice_text"),align="left"),
+                                                  h4(textOutput("avgstudio_text"),align="left"),
+                                                  h4(textOutput("avg1b_text"),align="left"),
+                                                  h4(textOutput("avg2b_text"),align="left"),
+                                                  h4(textOutput("avg3b_text"),align="left"),
+                                                  h4(textOutput("avg4b_text"),align="left"),
+                                                  h4(textOutput("transportation_text"),align="left"),
+                                                  h4(textOutput("amenities_text"),align="left"),
+                                                  h4(textOutput("crime_text"),align="left")
+                                                  ,
+                                                  hr(),
+                                                  h5("Next step",align="center"),
+                                                  #actionButton("click_reset_buttom","Click here back to original view"),
+                                                  actionButton("no_rec2", "Reset"),
+                                                  actionButton("click_jump_next","Check neighbourhood details"),
+                                                  hr(),
+                                                  checkboxInput("click_multi","Show Your Trace", value = F)
+                                                  
+                                    ))
+                       ),
                        ##################################2.2map###########################################
                        
                        tabPanel("Housing Explorer", icon = icon("map"),
