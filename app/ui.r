@@ -1,42 +1,146 @@
+#install.packages('leaflet.extras')
+#install.packages("shinythemes")
+#install.packages("shinyWidgets")
+#install.packages("htmltools")
+#install.packages("DT")
+
+library(data.table)
+library(plotly)
 library(shiny)
+library(shinydashboard)
 library(leaflet)
-
-# Define UI for application that draws a histogram
-shinyUI(fluidPage(
+library(leaflet.extras)
+library(shinythemes)
+library(shinyWidgets)
+library(DT)
+library(htmltools)
+shinyUI(
   
-  # Application title
-  titlePanel("2009 Manhattan Housing Sales"),
   
-  # Sidebar with a selector input for neighborhood
-  sidebarLayout(
-    sidebarPanel(
-      selectInput("nbhd", label = h5("Choose a Manhattan Neighborhood"), 
-                         choices = list("all neighborhoods"=0,
-                                        "Central Harlem"=1, 
-                                        "Chelsea and Clinton"=2,
-                                        "East Harlem"=3, 
-                                        "Gramercy Park and Murray Hill"=4,
-                                        "Greenwich Village and Soho"=5, 
-                                        "Lower Manhattan"=6,
-                                        "Lower East Side"=7, 
-                                        "Upper East Side"=8, 
-                                        "Upper West Side"=9,
-                                        "Inwood and Washington Heights"=10), 
-                         selected = 0)
-      #sliderInput("p.range", label=h3("Price Range (in thousands of dollars)"),
-      #            min = 0, max = 20000, value = c(200, 10000))
-    ),
-    # Show two panels
-    mainPanel(
-      #h4(textOutput("text")),
-      h3(code(textOutput("text1"))),
-      tabsetPanel(
-        # Panel 1 has three summary plots of sales. 
-        tabPanel("Sales summary", plotOutput("distPlot")), 
-        # Panel 2 has a map display of sales' distribution
-        tabPanel("Sales map", plotOutput("distPlot1"))),
-      leafletOutput("map", width = "80%", height = "400px")
-    )
- )
-))
+  
+  fluidPage(includeCSS("style.css"),
+            navbarPage("Manhattan Off-Campus Housing",
+                       #theme=shinythemes::shinytheme("spacelab"),
+                       fluid=T,
+                       
+                       #####################################1. Home##############################################           
+                       
+                       ##################################2.2map###########################################
+                       
+                       tabPanel("Housing Explorer", icon = icon("map"),
+                                
+                                fluidRow(
+                                  column(3,
+                                         h1("Compare Places You Select"),
+                                         fluidRow(
+                                           column(2,
+                                                  div(id = "action",actionButton("no_rec2", "Reset"))),
+                                           column(1,offset = 2,
+                                                  div(actionButton("click_jump_next","View Compare"))
+                                           ))),
+                                  
+                                  column(2, verbatimTextOutput('x4')
+                                  ),
+                                  
+                                  #tags$div(id="searchBar",
+                                  #         column(width=1,
+                                  #                style = "width:270px;display:inline-block;margin-right: 0px;margin-bottom:0px;margin-top:0px;padding-right:0px",
+                                  #                textInput(inputId="location",label="", value="", placeholder = "search your location...")
+                                  #         ),
+                                  #         column(width=1,
+                                  #                style = "margin-top: 25px;display:inline-block;margin-right: 0px;margin-left: 0px;left:0px;bottom:5px;padding-left:0px",
+                                  #                actionButton("button1",label="", icon = icon("search")))),
+                                                  #,style="padding:12px; font-size:100%;color: #fff; background-color: #337ab7; border-color: #2e6da4")
+                                           
+                                
+                                  
+                                  column(width=1,
+                                         style = "margin-top: 25px;display:inline-block;margin-right: 0px;margin-left: 150px",
+                                         dropdownButton(circle = FALSE,
+                                                        label="Rent Price", status = "default",
+                                           sliderInput("price","Rental Price", min=0,max=100000,step = 1000,
+                                                     value=c(10000,20000))
+                                         
+                                  )
+                                  ),
+                                  
+                                  column(width=1,
+                                         style="margin-top: 25px;display:inline-block;margin-right: 0px;margin-left: 10px",
+                                         dropdownButton(circle = FALSE,
+                                                      label="Restaurant", status = "default",
+                                                      selectInput("restaurant_type","Restaurant type",
+                                                       c("Food I Like"="",list("American", "Chinese", "Italian", "Japanese", "Pizza", "Others")), multiple=TRUE))
+                                  ),
 
+                                  column(width=1, 
+                                         style="margin-top: 25px;display:inline-block;margin-right: 10px;margin-left: 10px",
+                                         dropdownButton(circle = FALSE,
+                                                        label = "Bedrooms", status = "default",
+                                                        selectInput(inputId="min_bedrooms", label="choose", choices = c("studio"=0,"1b"=1,"2b"=2,"3b"=3,"4b"=4,"5b"=5,"6b"=6)
+                                                                    
+                                                        ))
+                                         # selectInput(inputId="min_bedrooms", label="",choices = c("min bedroom"=0,"studio"=1,"1b"=2,"2b"=3,"3b"=4,"4b"=5,"5b"=6,"6b"=7))
+                                  ),
+                                  
+                                  column(width=1,
+                                         style = "margin-top: 25px;display:inline-block;margin-right: 10px;margin-left: 10px",
+                                         dropdownButton(circle = FALSE,
+                                                        label = "Bathroom", status = "default",
+                                                        selectInput(inputId="min_bathrooms", label="choose", choices = c("studio"=0,"1b"=1,"2b"=2,"3b"=3,"4b"=4,"5b"=5,"6b"=6)
+                                                                    
+                                                        )
+                                         )),
+                                  column(width=1, 
+                                         style = "margin-top: 25px;display:inline-block;margin-right: 10px;margin-left: 10px",
+                                         actionButton("button2",label="Reset" 
+                                                      #,style="padding:12px; font-size:80%;color: #fff; background-color: #337ab7; border-color: #2e6da4"
+                                         ))
+                                  
+                                  
+                                  
+                                 
+                                ),
+                                
+                                hr(),
+                                
+                               
+                                mainPanel(
+                                  
+                                  fluidRow(
+                                    
+                                    column(7, 
+                                           br(),
+                                           br(),
+                                           # h3("current rank"),
+                                           dataTableOutput("rank")
+                                           
+                                    ),
+                                    
+                                  
+                                    
+                                    column(5,
+                                           leafletOutput("map", width = "220%", height = 650),
+                                           
+                                           absolutePanel(id="legend",
+                                                         fixed = TRUE,
+                                                         draggable = TRUE, top = 160, left = "auto", right = 80, bottom = "auto",
+                                                         width = 125, height = 215,
+                                                         
+                                                         h5("Select Features"),
+                                                         checkboxInput("Crime", label = "Crime",value= FALSE),
+                                                         checkboxInput("Bus", label = "Bus",value= FALSE),
+                                                         checkboxInput("Subway",label="Subway",value = FALSE),
+                                                         checkboxInput("Market", label = "Market",value = FALSE),
+                                                         checkboxInput("Restaurant", label = "Restaurant",value= FALSE)                                 
+                                                         
+                                           )#abs panel
+                                           
+                                    )#column
+                                  )#row
+                                )#main panel
+                       )#tab panel
+            )#navbar page
+            )# fluidpage
+  )#ui
+
+  
