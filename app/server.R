@@ -68,8 +68,8 @@ shinyServer(function(input, output,session) {
   # filter housing data:
   
   housingFilter=reactive({
-    bedroom_filter=housing$bedrooms>input$min_bedrooms 
-    bathroom_filter=housing$bathrooms>input$min_bathrooms
+    bedroom_filter=housing$bedrooms>=input$min_bedrooms 
+    bathroom_filter=housing$bathrooms>=input$min_bathrooms
     #price_filter=housing$price>=input$min_price & housing$price<=input$max_price
     price_filter2 =  housing$price>= input$price[1] & housing$price <= input$price[2]
     filter=bedroom_filter & bathroom_filter & price_filter2
