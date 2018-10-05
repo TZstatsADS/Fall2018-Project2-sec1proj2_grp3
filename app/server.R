@@ -53,6 +53,7 @@ shinyServer(function(input, output,session) {
   #################################################################
   ##### Panel 1 : summary  ########################################
   #################################################################
+  #posi <- list(lng = -73.971035, lat = 40.775659,id = NULL)
   output$map1 <- renderLeaflet({
     leaflet()%>%
       setView(lng = -73.98928, lat = 40.75042, zoom = 13)%>%
@@ -78,6 +79,8 @@ shinyServer(function(input, output,session) {
   
   
   ## Panel *: click on any area, popup text about this zipcode area's information#########
+  posi<-reactive({input$map1_shape_click})
+  
   observeEvent(input$map1_shape_click, {
     ## track
     if(input$click_multi == FALSE) leafletProxy('map1') %>%clearGroup("click")
@@ -99,6 +102,7 @@ shinyServer(function(input, output,session) {
     transportation_rank<-paste("Transportation Rank: ",rank_all[rank_all$zipcode==zip_sel,"ranking.trans"],sep="")
     amenities_rank<-paste("Amenities Rank: ",rank_all[rank_all$zipcode==zip_sel,"ranking.amenities"],sep="")
     crime_rank<-paste("Crime Rank: ",rank_all[rank_all$zipcode==zip_sel,"ranking.crime"],sep="")
+    debug_posi <- paste(posi()$lat,posi()$lng)
     
     leafletProxy("map1")%>%
       setView(click$lng,click$lat,zoom=14,options=list(animate=TRUE))
@@ -113,6 +117,8 @@ shinyServer(function(input, output,session) {
     output$transportation_text<-renderText({transportation_rank})
     output$amenities_text<-renderText({amenities_rank})
     output$crime_text<-renderText({crime_rank})
+    ######debug line####
+    output$debug <- renderText({debug_posi})
   })
   
   ## Panel *: Return to big view##################################
@@ -136,7 +142,8 @@ shinyServer(function(input, output,session) {
   #########main map######
   output$map <- renderLeaflet({
     leaflet() %>%
-      setView(lng = -73.971035, lat = 40.775659, zoom = 12) %>%
+      setView(lng = posi()$lng, lat = posi()$lat , zoom = 15) %>%
+      #setView(lng = -73.971035, lat = 40.775659, zoom = 12) %>%
       addProviderTiles("Stamen.TonerLite")%>%
       addMarkers(data=housing,
                lng=~lng,

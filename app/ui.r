@@ -30,7 +30,7 @@ shinyUI(
                                     leafletOutput("map1", width = "120%", height = "120%"),
                                     absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE, draggable = FALSE,
                                                   top = 100, left = 10, height = "auto",width = 243,
-                                                  h2("All about Map",align="center"),
+                                  
                                                   hr(),
                                                   h3("Click a Place on the Heatmap",align="center"),
                                                   hr(),
@@ -43,7 +43,10 @@ shinyUI(
                                                   h4(textOutput("avg4b_text"),align="left"),
                                                   h4(textOutput("transportation_text"),align="left"),
                                                   h4(textOutput("amenities_text"),align="left"),
-                                                  h4(textOutput("crime_text"),align="left")
+                                                  h4(textOutput("crime_text"),align="left"),
+                                                  
+                                                  ######debug line#####
+                                                  h4(textOutput("debug"),align="left")
                                                   ,
                                                   hr(),
                                                   h5("Next step",align="center"),
@@ -52,6 +55,7 @@ shinyUI(
                                                   actionButton("click_jump_next","Check neighbourhood details"),
                                                   hr(),
                                                   checkboxInput("click_multi","Show Your Trace", value = F)
+                                                  
                                                   
                                     ))
                        ),
