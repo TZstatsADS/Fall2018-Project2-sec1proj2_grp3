@@ -27,9 +27,23 @@ shinyUI(
                        tabPanel("All about map",
                                 div(class="outer",
                                     tags$style(type = "text/css", ".outer {position: fixed; top: 41px; left: 0; right: 0; bottom: 0; overflow: hidden; padding: 0}"),
-                                    leafletOutput("map1", width = "120%", height = "120%"),
+                                    leafletOutput("map1", width = "100%", height = "100%"),
                                     absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE, draggable = FALSE,
-                                                  top = 100, left = 10, height = "auto",width = 243,
+                                                  top = 80, left = 10, height = "auto",width = 243,
+                                                  
+                                                  h3("Select Features",align="center"),
+                                                  #checkboxInput("Crime", label = "Crime",value= T),
+                                                  #checkboxInput("Ave_rent", label = "Ave. rent", value = F ),
+                                                  selectInput("Preference",
+                                                              label = "Preference",
+                                                              choices = c("Crime",
+                                                                          "Ave. rent"),
+                                                              selected="Crime"),
+                                                  #checkboxInput("Bus", label = "Bus",value= FALSE),
+                                                  #checkboxInput("Subway",label="Subway",value = FALSE),
+                                                  #checkboxInput("Market", label = "Market",value = FALSE),
+                                                  #checkboxInput("Restaurant", label = "Restaurant",value= FALSE),
+                                                  hr(),
                                                   h3("Click a Place on the Heatmap",align="center"),
                                                   hr(),
                                                   h4(textOutput("zip_text"),align="left"),
@@ -46,8 +60,8 @@ shinyUI(
                                                   ######debug line#####
                                                   h4(textOutput("debug"),align="left")
                                                   ,
-                                                  hr(),
-                                                  h5("Next step",align="center"),
+                                                  #hr(),
+                                                  #h5("Next step",align="center"),
                                                   actionButton("click_reset_buttom", "Reset"),
                                                   actionButton("click_jump_next","Check community details"),
                                                   hr(),
@@ -55,6 +69,7 @@ shinyUI(
                                                   
                                                   
                                     ))
+                                
                        ),
                        ##################################2.2map###########################################
                        

@@ -20,6 +20,7 @@ library(dplyr)
 library(ggplot2)
 
 #####
+library(ggmap)
 load("../output/price.RData")
 load("../output/avg_price_zip.RData")
 load("../output/subdat.RData")
@@ -39,6 +40,10 @@ load("../output/restaurant.Rdata")
 
 source("../lib/showPopupHover.R")
 source("../lib/ZillowApi.R")
+##
+#source("../lib/revgeocode.R")
+
+##
 load("../output/housing.RData")
 
 
@@ -64,22 +69,73 @@ shinyServer(function(input, output,session) {
   ## Panel *: heat map###########################################
   # ----- set uo color pallette https://rstudio.github.io/leaflet/colors.html
   # Create a continuous palette function
-  pal <- colorNumeric(
-    palette = "Reds",
-    domain = subdat$value
-  )
-  leafletProxy("map1",data=subdat)%>%
-    addPolygons(layerId = ~ZIPCODE,
-                stroke = T, weight=1,
-                fillOpacity = 0.95,
-                color = ~pal(value),
-                highlightOptions = highlightOptions(color='#ff0000', opacity = 0.5, weight = 4, fillOpacity = 0.9,
-                                                    bringToFront = TRUE, sendToBack = TRUE))%>%
-    addLegend(pal = pal, values = ~value, opacity = 1)
+  #pal <- colorNumeric(
+  #  palette = "Reds",
+  #  domain = subdat$value
+  #)
+  #leafletProxy("map1",data=subdat)%>%
+  #  addPolygons(layerId = ~ZIPCODE,
+  #              stroke = T, weight=1,
+  #              fillOpacity = 0.95,
+  #              color = ~pal(value),
+  #              highlightOptions = highlightOptions(color='#ff0000', opacity = 0.5, weight = 4, fillOpacity = 0.9,
+  #                                                  bringToFront = TRUE, sendToBack = TRUE))%>%
+  #  addLegend(pal = pal, values = ~value, opacity = 1)
   
   
   ## Panel *: click on any area, popup text about this zipcode area's information#########
   #posi<-reactive({input$map1_shape_click})
+  observeEvent(input$Preference,{
+    p<- input$Preference
+    
+    proxy<-leafletProxy("map1")
+    if (p=="Crime"){
+      proxy%>%clearShapes()%>%clearControls()
+      proxy %>%
+        addPolygons(data=nyc, fillColor = ~pal(count), color = 'grey', weight = 1,
+                    fillOpacity = .6)%>%
+        addLegend(pal = pal, values = nyc$count,position="topright")
+    }
+    #else proxy%>%clearShapes()%>%clearControls()
+    else if(p=="Ave. rent"){
+      proxy%>%clearShapes()%>%clearControls()
+      proxy %>%
+        addPolygons(data=subdat, fillColor = ~pal(value), color = 'grey', weight = 1,
+                    fillOpacity = .6)%>%
+        addLegend(pal = pal, values = subdat$value,position="topright")
+    }
+  })
+  
+  #observeEvent(input$Ave_rent,{
+  #  p<- input$Ave_rent
+  #  proxy<-leafletProxy("map1")
+  #  if(p==TRUE){
+  #    proxy %>%
+  #      addPolygons(data=subdat, fillColor = ~pal(value), color = 'grey', weight = 1,
+  #                  fillOpacity = .6)%>%
+  #      addLegend(pal = pal, values = subdat$value,position="topright")
+  #  }
+  # else proxy%>%clearShapes()%>%clearControls()
+  #  
+  #})
+  
+  observeEvent(input$Subway,{
+    p<-input$Subway
+    proxy<-leafletProxy("map")
+    
+    if(p==TRUE){
+      proxy %>% 
+        addMarkers(data=sub.station, ~lng, ~lat,label = ~info,icon=icons(
+          iconUrl = "../output/icons8-Bus-48.png",
+          iconWidth = 7, iconHeight = 7),group="subway")
+    }
+    else proxy%>%clearGroup(group="subway")
+    
+  })
+  
+  
+  
+  
   
   observeEvent(input$map1_shape_click, {
     ## track
@@ -135,7 +191,7 @@ shinyServer(function(input, output,session) {
         clearPopups()
       posi <<- NULL
       leafletProxy("map")%>%
-        setView(click$lng,click$lat,zoom=13,options=list(animate=TRUE))
+        setView(-73.971035,40.775659,zoom=13,options=list(animate=TRUE))
       #####debug line#####
       #debug_posi <- paste(posi())
       #output$debug <- renderText({debug_posi})
