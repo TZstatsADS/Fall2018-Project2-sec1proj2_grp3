@@ -30,8 +30,6 @@ shinyUI(
                                     leafletOutput("map1", width = "120%", height = "120%"),
                                     absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE, draggable = FALSE,
                                                   top = 100, left = 10, height = "auto",width = 243,
-                                  
-                                                  hr(),
                                                   h3("Click a Place on the Heatmap",align="center"),
                                                   hr(),
                                                   h4(textOutput("zip_text"),align="left"),
@@ -50,11 +48,10 @@ shinyUI(
                                                   ,
                                                   hr(),
                                                   h5("Next step",align="center"),
-                                                  #actionButton("click_reset_buttom","Click here back to original view"),
-                                                  actionButton("no_rec2", "Reset"),
-                                                  actionButton("click_jump_next","Check neighbourhood details"),
+                                                  actionButton("click_reset_buttom", "Reset"),
+                                                  actionButton("click_jump_next","Check community details"),
                                                   hr(),
-                                                  checkboxInput("click_multi","Show Your Trace", value = F)
+                                                  checkboxInput("click_multi","Show Your Trace", value = T)
                                                   
                                                   
                                     ))
@@ -66,6 +63,7 @@ shinyUI(
                                 fluidRow(
                                   column(3,
                                          h1("Compare Places You Select"),
+    
                                          fluidRow(
                                            column(2,
                                                   div(id = "action",actionButton("no_rec2", "Reset"))),
