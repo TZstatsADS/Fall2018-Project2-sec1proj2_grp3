@@ -24,6 +24,8 @@ library(ggmap)
 load("../output/price.RData")
 load("../output/avg_price_zip.RData")
 load("../output/subdat.RData")
+load("../output/nycmarket.Rdata")
+load("../output/nycrent.Rdata")
 rank_all <- read.csv("../data/rank_all.csv",as.is = T)
 ########
 load("../output/markets.RData")
@@ -100,11 +102,18 @@ shinyServer(function(input, output,session) {
     else if(p=="Ave. rent"){
       proxy%>%clearShapes()%>%clearControls()
       proxy %>%
-        addPolygons(data=subdat, fillColor = ~pal(value), color = 'grey', weight = 1,
+        addPolygons(data=nycrent, fillColor = ~pal(count), color = 'grey', weight = 1,
                     fillOpacity = .6)%>%
-        addLegend(pal = pal, values = subdat$value,position="topright")
+        addLegend(pal = pal, values = nycrent$count,position="topright")
     }
-  })
+  else if(p=="Market"){
+    proxy%>%clearShapes()%>%clearControls()
+    proxy %>%
+      addPolygons(data=nycmarket, fillColor = ~pal(count*10), color = 'grey', weight = 1,
+                  fillOpacity = .6)%>%
+      addLegend(pal = pal, values = (nycmarket$count)*10,position="topright")
+  }
+})
   
   #observeEvent(input$Ave_rent,{
   #  p<- input$Ave_rent
@@ -149,17 +158,17 @@ shinyServer(function(input, output,session) {
     ##info
     
     #####*********#####
-    zip_sel<-as.character(revgeocode(as.numeric(c(click$lng,click$lat)),output="more")$postal_code)
-    zip<-paste("ZIPCODE: ",zip_sel)
-    price_avg<-paste("Average Price: $",avg_price_zip.df[avg_price_zip.df$region==zip_sel,"value"],sep="")
-    studio_avg<-paste("Studio: $",price[price$region==zip_sel&price$type=="Studio","avg"],sep="")
-    OneB_avg<-paste("1B: $",price[price$region==zip_sel&price$type=="OneBedroom","avg"],sep="")
-    TwoB_avg<-paste("2B: $",price[price$region==zip_sel&price$type=="TwoBedroom","avg"],sep="")
-    ThreeB_avg<-paste("3B: $",price[price$region==zip_sel&price$type=="ThreeBedroom","avg"],sep="")
-    FourB_avg<-paste("4B: $",price[price$region==zip_sel&price$type=="fOURbEDROOM","avg"],sep="")
-    transportation_rank<-paste("Transportation Rank: ",rank_all[rank_all$zipcode==zip_sel,"ranking.trans"],sep="")
-    amenities_rank<-paste("Amenities Rank: ",rank_all[rank_all$zipcode==zip_sel,"ranking.amenities"],sep="")
-    crime_rank<-paste("Crime Rank: ",rank_all[rank_all$zipcode==zip_sel,"ranking.crime"],sep="")
+    #zip_sel<-as.character(revgeocode(as.numeric(c(click$lng,click$lat)),output="more")$postal_code)
+    #zip<-paste("ZIPCODE: ",zip_sel)
+    #price_avg<-paste("Average Price: $",avg_price_zip.df[avg_price_zip.df$region==zip_sel,"value"],sep="")
+    #studio_avg<-paste("Studio: $",price[price$region==zip_sel&price$type=="Studio","avg"],sep="")
+    #OneB_avg<-paste("1B: $",price[price$region==zip_sel&price$type=="OneBedroom","avg"],sep="")
+    #TwoB_avg<-paste("2B: $",price[price$region==zip_sel&price$type=="TwoBedroom","avg"],sep="")
+    #ThreeB_avg<-paste("3B: $",price[price$region==zip_sel&price$type=="ThreeBedroom","avg"],sep="")
+    #FourB_avg<-paste("4B: $",price[price$region==zip_sel&price$type=="fOURbEDROOM","avg"],sep="")
+    #transportation_rank<-paste("Transportation Rank: ",rank_all[rank_all$zipcode==zip_sel,"ranking.trans"],sep="")
+    #amenities_rank<-paste("Amenities Rank: ",rank_all[rank_all$zipcode==zip_sel,"ranking.amenities"],sep="")
+    #crime_rank<-paste("Crime Rank: ",rank_all[rank_all$zipcode==zip_sel,"ranking.crime"],sep="")
     #####debug
     #debug_posi <- paste(posi())
     
@@ -169,16 +178,16 @@ shinyServer(function(input, output,session) {
     leafletProxy("map")%>%
       setView(click$lng,click$lat,zoom=15,options=list(animate=TRUE))
     
-    output$zip_text<-renderText({zip})
-    output$avgprice_text<-renderText({price_avg})
-    output$avgstudio_text<-renderText({studio_avg})
-    output$avg1b_text<-renderText(({OneB_avg}))
-    output$avg2b_text<-renderText(({TwoB_avg}))
-    output$avg3b_text<-renderText(({ThreeB_avg}))
-    output$avg4b_text<-renderText(({FourB_avg}))
-    output$transportation_text<-renderText({transportation_rank})
-    output$amenities_text<-renderText({amenities_rank})
-    output$crime_text<-renderText({crime_rank})
+    #output$zip_text<-renderText({zip})
+    #output$avgprice_text<-renderText({price_avg})
+    #output$avgstudio_text<-renderText({studio_avg})
+    #output$avg1b_text<-renderText(({OneB_avg}))
+    #output$avg2b_text<-renderText(({TwoB_avg}))
+    #output$avg3b_text<-renderText(({ThreeB_avg}))
+    #output$avg4b_text<-renderText(({FourB_avg}))
+    #output$transportation_text<-renderText({transportation_rank})
+    #output$amenities_text<-renderText({amenities_rank})
+    #output$crime_text<-renderText({crime_rank})
     ######debug line####
     #output$debug <- renderText({debug_posi})
   })
