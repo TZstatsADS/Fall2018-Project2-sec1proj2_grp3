@@ -57,11 +57,17 @@ color <- list(color1 = c('#F2D7D5','#D98880', '#CD6155', '#C0392B', '#922B21','#
 bin <- list(bin1 = c(0,500,1000,1500,2000,2500,3000), bin2 = c(0,1,2,3,4,5,6,7))
 bin2 <- list(bin1 = c(0,50,100,150,200,250,300), bin2 = c(0,1,2,3,4,5,6,7))
 bin3 <- list(bin1 = c(0,1000,2000,3000,4000,5000,6000), bin2 = c(0,1,2,3,4,5,6,7))
+<<<<<<< HEAD
 bin4 <- list(bin1 = c(0,20,40,60,80,100,120), bin2 = c(0,1,2,3,4,5,6,7))
 pal <- colorBin(color[[1]], bins = bin[[1]])
 pal2 <- colorBin(color[[1]], bins = bin2[[1]])
 pal3 <- colorBin(color[[1]], bins = bin3[[1]])
 pal4 <- colorBin(color[[1]], bins = bin4[[1]])
+=======
+pal <- colorBin(color[[1]], bins = bin[[1]])
+pal2 <- colorBin(color[[1]], bins = bin2[[1]])
+pal3 <- colorBin(color[[1]], bins = bin3[[1]])
+>>>>>>> c5695c1490f37657fb9bbc5bf640cde243a75d3e
 
 
 shinyServer(function(input, output,session) {
@@ -101,6 +107,7 @@ shinyServer(function(input, output,session) {
     else if(p=="Market"){
       proxy%>%clearShapes()%>%clearControls()
       proxy %>%
+<<<<<<< HEAD
         addPolygons(data=nycmarket, fillColor = ~pal(count*10), color = 'grey', weight = 1,  
                     fillOpacity = .6)%>%
         addLegend(pal = pal2, values = (nycmarket$count)*10,position="topright")
@@ -115,6 +122,28 @@ shinyServer(function(input, output,session) {
     
   })
   
+=======
+      addPolygons(data=nycmarket, fillColor = ~pal(count*10), color = 'grey', weight = 1,  
+                  fillOpacity = .6)%>%
+      addLegend(pal = pal2, values = (nycmarket$count)*10,position="topright")
+  }
+    
+    
+})
+  
+  #observeEvent(input$Ave_rent,{
+  #  p<- input$Ave_rent
+  #  proxy<-leafletProxy("map1")
+  #  if(p==TRUE){
+  #    proxy %>%
+  #      addPolygons(data=subdat, fillColor = ~pal(value), color = 'grey', weight = 1,
+  #                  fillOpacity = .6)%>%
+  #      addLegend(pal = pal, values = subdat$value,position="topright")
+  #  }
+  # else proxy%>%clearShapes()%>%clearControls()
+  #  
+  #})
+>>>>>>> c5695c1490f37657fb9bbc5bf640cde243a75d3e
   
   observeEvent(input$Subway,{
     p<-input$Subway
@@ -195,6 +224,7 @@ shinyServer(function(input, output,session) {
     
   #Esri.WorldTopoMap
   #########main map######
+<<<<<<< HEAD
   output$map <- renderLeaflet({
     if(is.null(posi)){
       leaflet() %>%
@@ -219,29 +249,42 @@ shinyServer(function(input, output,session) {
     
   })
   
+=======
+>>>>>>> c5695c1490f37657fb9bbc5bf640cde243a75d3e
   #output$map <- renderLeaflet({
-  #  if(is.null(posi)){
   #  leaflet() %>%
   #    setView(lng = -73.971035, 
-  #            lat = 40.775659 , zoom = 15) %>%
-  #    #setView(lng = posi2lng, lat = posi2lat, zoom = 12) %>%
+  #            lat = 40.775659 , zoom = 13) %>%
   #    addProviderTiles("Stamen.TonerLite")%>%
   #    addMarkers(data=housing,
-  #             lng=~lng,
-  #             lat=~lat,
-  #             clusterOptions=markerClusterOptions(),
-  #             group="housing_cluster")}
-  #  else{leaflet() %>%
-  #    
-  #      setView(lng = posi()$lng, lat = posi()$lat, zoom = 15) %>%
-  #      addProviderTiles("Stamen.TonerLite")%>%
-  #      addMarkers(data=housing,
-  #                 lng=~lng,
-  #                 lat=~lat,
-  #                 clusterOptions=markerClusterOptions(),
-  #                 group="housing_cluster")}
-  #             
-  #  })
+  #               lng=~lng,
+  #               lat=~lat,
+  #               clusterOptions=markerClusterOptions(),
+  #               group="housing_cluster")})
+  
+  output$map <- renderLeaflet({
+    if(is.null(posi)){
+    leaflet() %>%
+      setView(lng = -73.971035, 
+              lat = 40.775659 , zoom = 12) %>%
+      #setView(lng = posi2lng, lat = posi2lat, zoom = 12) %>%
+      addProviderTiles("Stamen.TonerLite")%>%
+      addMarkers(data=housing,
+               lng=~lng,
+               lat=~lat,
+               clusterOptions=markerClusterOptions(),
+               group="housing_cluster")}
+    else{leaflet() %>%
+      
+        setView(lng = posi()$lng, lat = posi()$lat, zoom = 15) %>%
+        addProviderTiles("Stamen.TonerLite")%>%
+        addMarkers(data=housing,
+                   lng=~lng,
+                   lat=~lat,
+                   clusterOptions=markerClusterOptions(),
+                   group="housing_cluster")}
+               
+    })
   
   
   
