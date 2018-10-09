@@ -38,7 +38,8 @@ shinyUI(
                                                               label = "Preference",
                                                               choices = c("Crime",
                                                                           "Ave. rent",
-                                                                          "Market"),
+                                                                          "Market",
+                                                                          "Garage"),
                                                               selected="Crime"),
                                                   #checkboxInput("Bus", label = "Bus",value= FALSE),
                                                   #checkboxInput("Subway",label="Subway",value = FALSE),
@@ -75,7 +76,8 @@ shinyUI(
                        ##################################2.2map###########################################
                        
                        tabPanel("Housing Explorer", icon = icon("map"),
-                                
+                                includeScript("www/click_hover.js"),
+                            
                                 fluidRow(
                                   column(3,
                                          h1("Compare Places You Select"),
@@ -84,7 +86,7 @@ shinyUI(
                                            column(2,
                                                   div(id = "action",actionButton("no_rec2", "Reset"))),
                                            column(1,offset = 2,
-                                                  div(actionButton("click_jump_next","View Compare"))
+                                                  div(actionButton("click_jump_next1","View Compare"))
                                            ))),
                                   
                                   column(2, verbatimTextOutput('x4')
@@ -186,7 +188,20 @@ shinyUI(
                                     )#column
                                   )#row
                                 )#main panel
-                       )#tab panel
+                       ),#tab panel
+              
+                       
+          ##################3.Compare##############################
+                       tabPanel("Compare",
+                                DT::dataTableOutput("filtered_data")
+                       ),#tab panel
+          
+          
+          
+          ##################4.Contact##############################
+          tabPanel("Contact", img(src="contact.png",height="100%",width="100%")
+                  )
+                                
             )#navbar page
             )# fluidpage
   )#ui

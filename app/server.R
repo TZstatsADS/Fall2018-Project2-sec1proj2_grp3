@@ -35,9 +35,11 @@ load("../output/nyc.RData")
 load("../output/rank.Rdata")
 load("../output/rent.Rdata")
 load("../output/region_rent.Rdata")
+load("../output/nycparking.Rdata")
 #load("../output/rank_all.Rdata")
 load("../output/restaurant.Rdata")
-
+surround = read.csv("../data/house_surrounding.csv")
+surround1 = subset(surround, select = -c(X, lat, lng))
 
 
 source("../lib/showPopupHover.R")
@@ -53,7 +55,13 @@ color <- list(color1 = c('#F2D7D5','#D98880', '#CD6155', '#C0392B', '#922B21','#
               color2 = c('#e6f5ff','#abdcff', '#70c4ff', '#0087e6', '#005998','#00365d','#1B4F72'),
               color3 = c("#F7FCF5","#74C476", "#005A32"))
 bin <- list(bin1 = c(0,500,1000,1500,2000,2500,3000), bin2 = c(0,1,2,3,4,5,6,7))
+bin2 <- list(bin1 = c(0,50,100,150,200,250,300), bin2 = c(0,1,2,3,4,5,6,7))
+bin3 <- list(bin1 = c(0,1000,2000,3000,4000,5000,6000), bin2 = c(0,1,2,3,4,5,6,7))
+bin4 <- list(bin1 = c(0,20,40,60,80,100,120), bin2 = c(0,1,2,3,4,5,6,7))
 pal <- colorBin(color[[1]], bins = bin[[1]])
+pal2 <- colorBin(color[[1]], bins = bin2[[1]])
+pal3 <- colorBin(color[[1]], bins = bin3[[1]])
+pal4 <- colorBin(color[[1]], bins = bin4[[1]])
 
 
 shinyServer(function(input, output,session) {
@@ -67,22 +75,6 @@ shinyServer(function(input, output,session) {
       addProviderTiles("Stamen.TonerLite")
     
   })
-  
-  ## Panel *: heat map###########################################
-  # ----- set uo color pallette https://rstudio.github.io/leaflet/colors.html
-  # Create a continuous palette function
-  #pal <- colorNumeric(
-  #  palette = "Reds",
-  #  domain = subdat$value
-  #)
-  #leafletProxy("map1",data=subdat)%>%
-  #  addPolygons(layerId = ~ZIPCODE,
-  #              stroke = T, weight=1,
-  #              fillOpacity = 0.95,
-  #              color = ~pal(value),
-  #              highlightOptions = highlightOptions(color='#ff0000', opacity = 0.5, weight = 4, fillOpacity = 0.9,
-  #                                                  bringToFront = TRUE, sendToBack = TRUE))%>%
-  #  addLegend(pal = pal, values = ~value, opacity = 1)
   
   
   ## Panel *: click on any area, popup text about this zipcode area's information#########
@@ -102,31 +94,27 @@ shinyServer(function(input, output,session) {
     else if(p=="Ave. rent"){
       proxy%>%clearShapes()%>%clearControls()
       proxy %>%
-        addPolygons(data=nycrent, fillColor = ~pal(count), color = 'grey', weight = 1,
+        addPolygons(data=nycrent, fillColor = ~pal(count/2), color = 'grey', weight = 1,
                     fillOpacity = .6)%>%
-        addLegend(pal = pal, values = nycrent$count,position="topright")
+        addLegend(pal = pal3, values = (nycrent$count/2),position="topright")
     }
-  else if(p=="Market"){
-    proxy%>%clearShapes()%>%clearControls()
-    proxy %>%
-      addPolygons(data=nycmarket, fillColor = ~pal(count*10), color = 'grey', weight = 1,
-                  fillOpacity = .6)%>%
-      addLegend(pal = pal, values = (nycmarket$count)*10,position="topright")
-  }
-})
+    else if(p=="Market"){
+      proxy%>%clearShapes()%>%clearControls()
+      proxy %>%
+        addPolygons(data=nycmarket, fillColor = ~pal(count*10), color = 'grey', weight = 1,  
+                    fillOpacity = .6)%>%
+        addLegend(pal = pal2, values = (nycmarket$count)*10,position="topright")
+    }
+    else if(p=="Garage"){
+      proxy%>%clearShapes()%>%clearControls()
+      proxy %>%
+        addPolygons(data=nycparking, fillColor = ~pal(count*25), color = 'grey', weight = 1,  
+                    fillOpacity = .6)%>%
+        addLegend(pal = pal4, values = (nycparking$count*25),position="topright")
+    }
+    
+  })
   
-  #observeEvent(input$Ave_rent,{
-  #  p<- input$Ave_rent
-  #  proxy<-leafletProxy("map1")
-  #  if(p==TRUE){
-  #    proxy %>%
-  #      addPolygons(data=subdat, fillColor = ~pal(value), color = 'grey', weight = 1,
-  #                  fillOpacity = .6)%>%
-  #      addLegend(pal = pal, values = subdat$value,position="topright")
-  #  }
-  # else proxy%>%clearShapes()%>%clearControls()
-  #  
-  #})
   
   observeEvent(input$Subway,{
     p<-input$Subway
@@ -144,14 +132,11 @@ shinyServer(function(input, output,session) {
   
   
   
-  
-  
   observeEvent(input$map1_shape_click, {
     ## track
     if(input$click_multi == FALSE) leafletProxy('map1') %>%clearGroup("click")
     click <- input$map1_shape_click
     posi <<- reactive({input$map1_shape_click})
-    #posi <<- reactiveV({input$map1_shape_click})
     leafletProxy('map1')%>%
       addMarkers(click$lng, click$lat, group="click", icon=list(iconUrl='icon/leaves.png',iconSize=c(60,60)))
     
@@ -169,9 +154,7 @@ shinyServer(function(input, output,session) {
     #transportation_rank<-paste("Transportation Rank: ",rank_all[rank_all$zipcode==zip_sel,"ranking.trans"],sep="")
     #amenities_rank<-paste("Amenities Rank: ",rank_all[rank_all$zipcode==zip_sel,"ranking.amenities"],sep="")
     #crime_rank<-paste("Crime Rank: ",rank_all[rank_all$zipcode==zip_sel,"ranking.crime"],sep="")
-    #####debug
-    #debug_posi <- paste(posi())
-    
+
     leafletProxy("map1")%>%
       setView(click$lng,click$lat,zoom=14,options=list(animate=TRUE))
     
@@ -188,8 +171,6 @@ shinyServer(function(input, output,session) {
     #output$transportation_text<-renderText({transportation_rank})
     #output$amenities_text<-renderText({amenities_rank})
     #output$crime_text<-renderText({crime_rank})
-    ######debug line####
-    #output$debug <- renderText({debug_posi})
   })
   
   ## Panel *: Return to big view##################################
@@ -201,9 +182,6 @@ shinyServer(function(input, output,session) {
       posi <<- NULL
       leafletProxy("map")%>%
         setView(-73.971035,40.775659,zoom=13,options=list(animate=TRUE))
-      #####debug line#####
-      #debug_posi <- paste(posi())
-      #output$debug <- renderText({debug_posi})
     }
   })
   
@@ -218,15 +196,28 @@ shinyServer(function(input, output,session) {
   #Esri.WorldTopoMap
   #########main map######
   output$map <- renderLeaflet({
-    leaflet() %>%
-      setView(lng = -73.971035, 
-              lat = 40.775659 , zoom = 13) %>%
-      addProviderTiles("Stamen.TonerLite")%>%
-      addMarkers(data=housing,
-                 lng=~lng,
-                 lat=~lat,
-                 clusterOptions=markerClusterOptions(),
-                 group="housing_cluster")})
+    if(is.null(posi)){
+      leaflet() %>%
+        setView(lng = -73.971035, 
+                lat = 40.775659 , zoom = 13) %>%
+        #setView(lng = posi2lng, lat = posi2lat, zoom = 12) %>%
+        addProviderTiles("Stamen.TonerLite")%>%
+        addMarkers(data=housing,
+                   lng=~lng,
+                   lat=~lat,
+                   clusterOptions=markerClusterOptions(),
+                   group="housing_cluster")}
+    else{leaflet() %>%
+        
+        setView(lng = posi()$lng, lat = posi()$lat, zoom = 15) %>%
+        addProviderTiles("Stamen.TonerLite")%>%
+        addMarkers(data=housing,
+                   lng=~lng,
+                   lat=~lat,
+                   clusterOptions=markerClusterOptions(),
+                   group="housing_cluster")}
+    
+  })
   
   #output$map <- renderLeaflet({
   #  if(is.null(posi)){
@@ -480,7 +471,7 @@ shinyServer(function(input, output,session) {
         iconUrl = "../output/icons8-Location-50.png",iconWidth = 25, iconHeight = 25))
   })
   #################Clear Choices############
-  observeEvent(input$button2,{
+  observeEvent(input$no_rec2,{
     proxy<-leafletProxy("map")
     proxy %>%
       setView(lng = -73.971035, lat = 40.775659, zoom = 12) %>%
@@ -584,7 +575,24 @@ shinyServer(function(input, output,session) {
   ##########################################################################
   ## Panel 3: compare ######################################################
   ########################################################################## 
+  observeEvent(input$click_jump_next1,{
+    if(input$click_jump_next1){
+      updateTabsetPanel(session, "inTabset",selected = "Compare")
+    }
+  })
   
+  observe({
+    
+    housing_sort=marksInBounds()
+    output$filtered_data <- DT::renderDataTable({
+      selected <- input$rank_rows_selected
+      if(is.null(selected)){
+        surround1
+      } else {
+        surround1[surround1$addr %in% housing_sort$addr[selected], ]
+      }
+    })
+  })
 #  observeEvent(input$click_jump_next,{
 #    if(input$click_jump_next){
 #     updateTabsetPanel(session, "inTabset",selected = "Compare")
