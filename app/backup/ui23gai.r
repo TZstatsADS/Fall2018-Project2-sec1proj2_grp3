@@ -22,7 +22,57 @@ shinyUI(
             navbarPage(p(class="h","Rent Smart"),id = "inTabset",
                        #theme=shinythemes::shinytheme("spacelab"),
                        fluid=T,
-                       
+                       #####################################1. Home##############################################           
+                       tabPanel("All about map",
+                                div(class="outer",
+                                    tags$style(type = "text/css", ".outer {position: fixed; top: 41px; left: 0; right: 0; bottom: 0; overflow: hidden; padding: 0}"),
+                                    leafletOutput("map1", width = "100%", height = "100%"),
+                                    absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE, draggable = FALSE,
+                                                  top = 80, left = 10, height = "auto",width = 243,
+
+                                                  h3("Select Features",align="center"),
+                                                  #checkboxInput("Crime", label = "Crime",value= T),
+                                                  #checkboxInput("Ave_rent", label = "Ave. rent", value = F ),
+                                                  selectInput("Preference",
+                                                              label = "Preference",
+                                                              choices = c("Crime",
+                                                                          "Ave. rent",
+                                                                          "Market",
+                                                                          "Garage"),
+                                                              selected="Crime"),
+                                                  #checkboxInput("Bus", label = "Bus",value= FALSE),
+                                                  #checkboxInput("Subway",label="Subway",value = FALSE),
+                                                  #checkboxInput("Market", label = "Market",value = FALSE),
+                                                  #checkboxInput("Restaurant", label = "Restaurant",value= FALSE),
+                                                  hr(),
+                                                  h3("Click a Place on the Heatmap",align="center"),
+                                                  hr(),
+                                                  #h4(textOutput("zip_text"),align="left"),
+                                                  #h4(textOutput("avgprice_text"),align="left"),
+                                                  #h4(textOutput("avgstudio_text"),align="left"),
+                                                  #h4(textOutput("avg1b_text"),align="left"),
+                                                  #h4(textOutput("avg2b_text"),align="left"),
+                                                  #h4(textOutput("avg3b_text"),align="left"),
+                                                  #h4(textOutput("avg4b_text"),align="left"),
+                                                  #h4(textOutput("transportation_text"),align="left"),
+                                                  #h4(textOutput("amenities_text"),align="left"),
+                                                  #h4(textOutput("crime_text"),align="left"),
+
+                                                  ######debug line#####
+                                                  h4(textOutput("debug"),align="left")
+                                                  ,
+                                                  #hr(),
+                                                  #h5("Next step",align="center"),
+                                                  actionButton("click_reset_buttom", "Reset"),
+                                                  actionButton("click_jump_next","Check community details"),
+                                                  hr(),
+                                                  checkboxInput("click_multi","Show Your Trace", value = T)
+
+
+                                    )
+                                    )
+                                
+                       ),
                        
                        
                        ##################################2.2map###########################################
@@ -89,18 +139,20 @@ shinyUI(
                                   column(width=1,
                                          style="margin-top: 25px;display:inline-block;margin-right: 10px;margin-left: 10px",
                                          dropdownButton(circle = FALSE,
-                                                        label="Restaurant", status = "default",
-                                                        selectInput("restaurant_type","Restaurant type",
-                                                                    c("Food I Like"="",list("Chinese","American","Italian","Japanese", "Pizza","Cafe", "Others")), multiple=TRUE))
+                                                        label="Market", status = "default",
+                                                        selectInput("market_type","Market type",
+                                                                    c("I wanna go to"="",list("Grocery","Pharmacy")), multiple=TRUE))
                                   ),
                                   
                                   column(width=1,
                                          style="margin-top: 25px;display:inline-block;margin-right: 10px;margin-left: 10px",
                                          dropdownButton(circle = FALSE,
-                                                        label="Market", status = "default",
-                                                        selectInput("market_type","Market type",
-                                                                    c("I wanna go to"="",list("Grocery","Pharmacy")), multiple=TRUE))
+                                                        label="Restaurant", status = "default",
+                                                        selectInput("restaurant_type","Restaurant type",
+                                                                    c("Food I Like"="",list("Chinese","American","Italian","Japanese", "Pizza","Cafe", "Others")), multiple=TRUE))
                                   ),
+                                  
+                                  
                                   column(width=1, 
                                          style = "margin-top: 25px;display:inline-block;margin-right: 0px;margin-left: 10px",
                                          actionButton("button2",label="Clear"
@@ -162,9 +214,11 @@ shinyUI(
                        
                        tabPanel("Compare",
                                 DT::dataTableOutput("filtered_data")
-                       )
+                       ),
                        
                        ##### 4.contact##########
+                       tabPanel(title = "Contact", img(src="contact.png", height = "100%", width = "100%"))
+                    
                        # tabPanel(title='Home', 
                        #          icon=icon('home'),
                        #          div(id='NY'),

@@ -21,6 +21,17 @@ library(ggplot2)
 library("formattable")
 
 
+#####
+library(ggmap)
+load("../output/price.RData")
+load("../output/avg_price_zip.RData")
+load("../output/subdat.RData")
+load("../output/nycmarket.Rdata")
+load("../output/nycrent.Rdata")
+load("../output/nycparking.Rdata")
+rank_all <- read.csv("../data/rank_all.csv",as.is = T)
+########
+
 load("../output/markets.RData")
 load("../output/sub.station.RData")
 load("../output/bus.stop.RData")
@@ -30,9 +41,9 @@ load("../output/rent.Rdata")
 load("../output/region_rent.Rdata")
 load("../output/restaurant.Rdata")
 #load("../output/restaurant_details.Rdata")
-housing = read.csv("../data/housing.original.csv")
+#housing = read.csv("../data/housing.original.csv")
 market = read.csv("../data/market_dxy.csv",as.is = T)
-rank_zip = read.csv("../data/rank_zip.csv",as.is = T)
+#rank_zip = read.csv("../data/rank_zip.csv",as.is = T)
 housing_final = read.csv("../data/housing_final.csv")
 museum = read.csv("../data/museums.csv",as.is = T)
 theater = read.csv("../data/theater.csv",as.is = T)
@@ -40,33 +51,180 @@ theater = read.csv("../data/theater.csv",as.is = T)
 
 source("../lib/showPopupHover.R")
 source("../lib/ZillowApi.R")
-#load("../output/housing.RData")
+load("../output/housing.RData")
 
 
 color <- list(color1 = c('#F2D7D5','#D98880', '#CD6155', '#C0392B', '#922B21','#641E16'),
               color2 = c('#e6f5ff','#abdcff', '#70c4ff', '#0087e6', '#005998','#00365d','#1B4F72'),
               color3 = c("#F7FCF5","#74C476", "#005A32"))
 bin <- list(bin1 = c(0,500,1000,1500,2000,2500,3000), bin2 = c(0,1,2,3,4,5,6,7))
+bin2 <- list(bin1 = c(0,50,100,150,200,250,300), bin2 = c(0,1,2,3,4,5,6,7))
+bin3 <- list(bin1 = c(0,1000,2000,3000,4000,5000,6000), bin2 = c(0,1,2,3,4,5,6,7))
+bin4 <- list(bin1 = c(0,20,40,60,80,100,120), bin2 = c(0,1,2,3,4,5,6,7))
 pal <- colorBin(color[[1]], bins = bin[[1]])
+pal2 <- colorBin(color[[1]], bins = bin2[[1]])
+pal3 <- colorBin(color[[1]], bins = bin3[[1]])
+pal4 <- colorBin(color[[1]], bins = bin4[[1]])
 
 
 shinyServer(function(input, output,session) {
+  #################################################################
+  ##### Panel 1 : summary  ########################################
+  #################################################################
+  posi <- NULL
+  output$map1 <- renderLeaflet({
+    leaflet()%>%
+      setView(lng = -73.98928, lat = 40.75042, zoom = 13)%>%
+      addProviderTiles("Stamen.TonerLite")
+    
+  })
   
-  #Esri.WorldTopoMap
-  #########main map######
-  output$map <- renderLeaflet({
-    leaflet() %>%
-      setView(lng = -73.971035, lat = 40.775659, zoom = 12) %>%
-      addProviderTiles("Stamen.TonerLite")%>%
-      addMarkers(data=housing,
-               lng=~lng,
-               lat=~lat,
-               clusterOptions=markerClusterOptions(),
-               group="housing_cluster"
-    )
+  ## Panel *: heat map###########################################
+  
+  
+  ## Panel *: click on any area, popup text about this zipcode area's information#########
+  #posi<-reactive({input$map1_shape_click})
+  observeEvent(input$Preference,{
+    p<- input$Preference
+    
+    proxy<-leafletProxy("map1")
+    if (p=="Crime"){
+      proxy%>%clearShapes()%>%clearControls()
+      proxy %>%
+        addPolygons(data=nyc, fillColor = ~pal(count), color = 'grey', weight = 1,
+                    fillOpacity = .6)%>%
+        addLegend(pal = pal, values = nyc$count,position="topright")
+    }
+    #else proxy%>%clearShapes()%>%clearControls()
+    else if(p=="Ave. rent"){
+      proxy%>%clearShapes()%>%clearControls()
+      proxy %>%
+        addPolygons(data=nycrent, fillColor = ~pal(count/2), color = 'grey', weight = 1,
+                    fillOpacity = .6)%>%
+        addLegend(pal = pal3, values = (nycrent$count/2),position="topright")
+    }
+    else if(p=="Market"){
+      proxy%>%clearShapes()%>%clearControls()
+      proxy %>%
+        addPolygons(data=nycmarket, fillColor = ~pal(count*10), color = 'grey', weight = 1,  
+                    fillOpacity = .6)%>%
+        addLegend(pal = pal2, values = (nycmarket$count)*10,position="topright")
+    }
+    else if(p=="Garage"){
+      proxy%>%clearShapes()%>%clearControls()
+      proxy %>%
+        addPolygons(data=nycparking, fillColor = ~pal(count*25), color = 'grey', weight = 1,  
+                    fillOpacity = .6)%>%
+        addLegend(pal = pal4, values = (nycparking$count*25),position="topright")
+    }
+    
+    
+  })
+  
+  observeEvent(input$map1_shape_click, {
+    ## track
+    if(input$click_multi == FALSE) leafletProxy('map1') %>%clearGroup("click")
+    click <- input$map1_shape_click
+    posi <<- reactive({input$map1_shape_click})
+    #posi <<- reactiveV({input$map1_shape_click})
+    leafletProxy('map1')%>%
+      addMarkers(click$lng, click$lat, group="click", icon=list(iconUrl='icon/leaves.png',iconSize=c(60,60)))
+    
+    ##info
+    
+    #####*********#####
+    #zip_sel<-as.character(revgeocode(as.numeric(c(click$lng,click$lat)),output="more")$postal_code)
+    #zip<-paste("ZIPCODE: ",zip_sel)
+    #price_avg<-paste("Average Price: $",avg_price_zip.df[avg_price_zip.df$region==zip_sel,"value"],sep="")
+    #studio_avg<-paste("Studio: $",price[price$region==zip_sel&price$type=="Studio","avg"],sep="")
+    #OneB_avg<-paste("1B: $",price[price$region==zip_sel&price$type=="OneBedroom","avg"],sep="")
+    #TwoB_avg<-paste("2B: $",price[price$region==zip_sel&price$type=="TwoBedroom","avg"],sep="")
+    #ThreeB_avg<-paste("3B: $",price[price$region==zip_sel&price$type=="ThreeBedroom","avg"],sep="")
+    #FourB_avg<-paste("4B: $",price[price$region==zip_sel&price$type=="fOURbEDROOM","avg"],sep="")
+    #transportation_rank<-paste("Transportation Rank: ",rank_all[rank_all$zipcode==zip_sel,"ranking.trans"],sep="")
+    #amenities_rank<-paste("Amenities Rank: ",rank_all[rank_all$zipcode==zip_sel,"ranking.amenities"],sep="")
+    #crime_rank<-paste("Crime Rank: ",rank_all[rank_all$zipcode==zip_sel,"ranking.crime"],sep="")
+    
+    
+    leafletProxy("map1")%>%
+      setView(click$lng,click$lat,zoom=14,options=list(animate=TRUE))
+    
+    leafletProxy("map")%>%
+      setView(click$lng,click$lat,zoom=15,options=list(animate=TRUE))
+    
+    #output$zip_text<-renderText({zip})
+    #output$avgprice_text<-renderText({price_avg})
+    #output$avgstudio_text<-renderText({studio_avg})
+    #output$avg1b_text<-renderText(({OneB_avg}))
+    #output$avg2b_text<-renderText(({TwoB_avg}))
+    #output$avg3b_text<-renderText(({ThreeB_avg}))
+    #output$avg4b_text<-renderText(({FourB_avg}))
+    #output$transportation_text<-renderText({transportation_rank})
+    #output$amenities_text<-renderText({amenities_rank})
+    #output$crime_text<-renderText({crime_rank})
+    
+  })
+  
+  ## Panel *: Return to big view##################################
+  observeEvent(input$click_reset_buttom,{
+    if(input$click_reset_buttom){
+      leafletProxy("map1")%>%
+        setView(lng = -73.98928, lat = 40.75042, zoom = 13)%>% 
+        clearPopups()
+      posi <<- NULL
+      leafletProxy("map")%>%
+        setView(-73.971035,40.775659,zoom=13,options=list(animate=TRUE))
+      #####debug line#####
+      #debug_posi <- paste(posi())
+      #output$debug <- renderText({debug_posi})
+    }
+  })
+  
+  ## Panel 1: to panel 2
+  observeEvent(input$click_jump_next,{
+    if(input$click_jump_next){
+      updateTabsetPanel(session, "inTabset",selected = "Housing Explorer")
+    }
   })
   
   
+  #Esri.WorldTopoMap
+  #########main map######
+  # output$map <- renderLeaflet({
+  #   leaflet() %>%
+  #     setView(lng = -73.971035, lat = 40.775659, zoom = 12) %>%
+  #     addProviderTiles("Stamen.TonerLite")%>%
+  #     addMarkers(data=housing,
+  #              lng=~lng,
+  #              lat=~lat,
+  #              clusterOptions=markerClusterOptions(),
+  #              group="housing_cluster"
+  #   )
+  # })
+  
+  output$map <- renderLeaflet({
+    if(is.null(posi)){
+      leaflet() %>%
+        setView(lng = -73.971035,
+                lat = 40.775659 , zoom = 13) %>%
+        #setView(lng = posi2lng, lat = posi2lat, zoom = 12) %>%
+        addProviderTiles("Stamen.TonerLite")%>%
+        addMarkers(data=housing,
+                   lng=~lng,
+                   lat=~lat,
+                   clusterOptions=markerClusterOptions(),
+                   group="housing_cluster")}
+    else{leaflet() %>%
+        
+        setView(lng = posi()$lng, lat = posi()$lat, zoom = 15) %>%
+        addProviderTiles("Stamen.TonerLite")%>%
+        addMarkers(data=housing,
+                   lng=~lng,
+                   lat=~lat,
+                   clusterOptions=markerClusterOptions(),
+                   group="housing_cluster")}
+    
+  })
   
   #############Housing#############
   
@@ -417,56 +575,7 @@ shinyServer(function(input, output,session) {
   observeEvent(input$button2, {
     updateSelectInput(session, "restaurant_type", selected =  "")
   })
-  # 
-  # leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Chinese'),]) %>%
-  #   addMarkers(~lon,~lat, icon=icons(
-  #             iconUrl = "../output/icons8-china-100.PNG",
-  #             iconWidth = 10, iconHeight = 10, shadowWidth = 10, shadowHeight = 10),popup = paste("Name:",restaurant$DBA,"<br/>",
-  #                                                                                                 "Tel:",restaurant$PHONE,"<br/>",
-  #                                                                                                 "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
-  #                                                                                                 "Address:",restaurant$geoAddress),  group  = "chin")
-  # leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'American'),]) %>%
-  #   addMarkers(~lon,~lat, icon=icons(
-  #     iconUrl = "../output/icons8-usa-96.PNG",
-  #     iconWidth = 10, iconHeight = 10, shadowWidth = 10, shadowHeight = 10),popup = paste("Name:",restaurant$DBA,"<br/>",
-  #                                                                                         "Tel:",restaurant$PHONE,"<br/>",
-  #                                                                                         "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
-  #                                                                                         "Address:",restaurant$geoAddress), group = "amer")
-  # leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Italian'),]) %>%
-  #   addMarkers(~lon,~lat, icon=icons(
-  #     iconUrl = "../output/icons8-italy-96.PNG",
-  #     iconWidth = 10, iconHeight = 10, shadowWidth = 10, shadowHeight = 10),popup = paste("Name:",restaurant$DBA,"<br/>",
-  #                                                                                         "Tel:",restaurant$PHONE,"<br/>",
-  #                                                                                         "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
-  #                                                                                         "Address:",restaurant$geoAddress),  group = "ita")
-  # leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Japanese'),]) %>%
-  #   addMarkers(~lon,~lat, icon=icons(
-  #     iconUrl = "../output/icons8-japan-96.PNG",
-  #     iconWidth = 10, iconHeight = 10, shadowWidth = 10, shadowHeight = 10),popup = paste("Name:",restaurant$DBA,"<br/>",
-  #                                                                                         "Tel:",restaurant$PHONE,"<br/>",
-  #                                                                                         "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
-  #                                                                                         "Address:",restaurant$geoAddress),  group = "jap")
-  # leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Pizza'),]) %>%
-  #   addMarkers(~lon,~lat, icon=icons(
-  #     iconUrl = "../output/icons8-pizza-96.PNG",
-  #     iconWidth = 10, iconHeight = 10, shadowWidth = 10, shadowHeight = 10),popup = paste("Name:",restaurant$DBA,"<br/>",
-  #                                                                                         "Tel:",restaurant$PHONE,"<br/>",
-  #                                                                                         "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
-  #                                                                                         "Address:",restaurant$geoAddress),  group = "piz")
-  # leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Others'),]) %>%
-  #   addMarkers(~lon,~lat, icon=icons(
-  #     iconUrl = "../output/icons8-restaurant-96.PNG",
-  #     iconWidth = 10, iconHeight = 10, shadowWidth = 10, shadowHeight = 10),popup = paste("Name:",restaurant$DBA,"<br/>",
-  #                                                                                         "Tel:",restaurant$PHONE,"<br/>",
-  #                                                                                         "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
-  #                                                                                         "Address:",restaurant$geoAddress),  group = "oth")
-  # leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Cafe'),]) %>%
-  #   addMarkers(~lon,~lat, icon=icons(
-  #     iconUrl = "../output/icons8-cafe-96.PNG",
-  #     iconWidth = 10, iconHeight = 10, shadowWidth = 10, shadowHeight = 10),popup = paste("Name:",restaurant$DBA,"<br/>",
-  #                                                                                         "Tel:",restaurant$PHONE,"<br/>",
-  #                                                                                         "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
-  #                                                                                         "Address:",restaurant$geoAddress), group = "caf")
+                                            
   leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Chinese'),]) %>%
     addCircleMarkers(~lon,~lat,color = "#FFEC5C", popup = ~paste("Name:",restaurant$DBA,"<br/>",
                                                                  "Tel:",restaurant$PHONE,"<br/>",
