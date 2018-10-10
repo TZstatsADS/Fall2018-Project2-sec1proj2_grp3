@@ -69,133 +69,133 @@ shinyServer(function(input, output,session) {
   #################################################################
   ##### Panel 1 : summary  ########################################
   #################################################################
-#   posi <- NULL
-#   output$map1 <- renderLeaflet({
-#     leaflet()%>%
-#       setView(lng = -73.98928, lat = 40.75042, zoom = 13)%>%
-#       addProviderTiles("Stamen.TonerLite")
-#     
-#   })
-#   
-#   ## Panel *: heat map###########################################
-#  
-#   
-#   ## Panel *: click on any area, popup text about this zipcode area's information#########
-#   #posi<-reactive({input$map1_shape_click})
-#   observeEvent(input$Preference,{
-#     p<- input$Preference
-#     
-#     proxy<-leafletProxy("map1")
-#     if (p=="Crime"){
-#       proxy%>%clearShapes()%>%clearControls()
-#       proxy %>%
-#         addPolygons(data=nyc, fillColor = ~pal(count), color = 'grey', weight = 1,
-#                     fillOpacity = .6)%>%
-#         addLegend(pal = pal, values = nyc$count,position="topright")
-#     }
-#     #else proxy%>%clearShapes()%>%clearControls()
-#     else if(p=="Ave. rent"){
-#       proxy%>%clearShapes()%>%clearControls()
-#       proxy %>%
-#         addPolygons(data=nycrent, fillColor = ~pal(count/2), color = 'grey', weight = 1,
-#                     fillOpacity = .6)%>%
-#         addLegend(pal = pal3, values = (nycrent$count/2),position="topright")
-#     }
-#     else if(p=="Market"){
-#       proxy%>%clearShapes()%>%clearControls()
-#       proxy %>%
-#       addPolygons(data=nycmarket, fillColor = ~pal(count*10), color = 'grey', weight = 1,  
-#                   fillOpacity = .6)%>%
-#       addLegend(pal = pal2, values = (nycmarket$count)*10,position="topright")
-#     }
-#     else if(p=="Garage"){
-#       proxy%>%clearShapes()%>%clearControls()
-#       proxy %>%
-#         addPolygons(data=nycparking, fillColor = ~pal(count*25), color = 'grey', weight = 1,  
-#                     fillOpacity = .6)%>%
-#         addLegend(pal = pal4, values = (nycparking$count*25),position="topright")
-#     }
-#     
-#     
-# })
-#   
-#   
-#   observeEvent(input$Subway,{
-#     p<-input$Subway
-#     proxy<-leafletProxy("map")
-#     
-#     if(p==TRUE){
-#       proxy %>% 
-#         addMarkers(data=sub.station, ~lng, ~lat,label = ~info,icon=icons(
-#           iconUrl = "../output/icons8-Bus-48.png",
-#           iconWidth = 7, iconHeight = 7),group="subway")
-#     }
-#     else proxy%>%clearGroup(group="subway")
-#     
-#   })
-#   
-#   
-#   
-#   
-#   
-#   observeEvent(input$map1_shape_click, {
-#     ## track
-#     if(input$click_multi == FALSE) leafletProxy('map1') %>%clearGroup("click")
-#     click <- input$map1_shape_click
-#     posi <<- reactive({input$map1_shape_click})
-#     #posi <<- reactiveV({input$map1_shape_click})
-#     leafletProxy('map1')%>%
-#       addMarkers(click$lng, click$lat, group="click", icon=list(iconUrl='icon/leaves.png',iconSize=c(60,60)))
-#     
-#     ##info
-#     
-#     #####*********#####
-#     #zip_sel<-as.character(revgeocode(as.numeric(c(click$lng,click$lat)),output="more")$postal_code)
-#     #zip<-paste("ZIPCODE: ",zip_sel)
-#     #price_avg<-paste("Average Price: $",avg_price_zip.df[avg_price_zip.df$region==zip_sel,"value"],sep="")
-#     #studio_avg<-paste("Studio: $",price[price$region==zip_sel&price$type=="Studio","avg"],sep="")
-#     #OneB_avg<-paste("1B: $",price[price$region==zip_sel&price$type=="OneBedroom","avg"],sep="")
-#     #TwoB_avg<-paste("2B: $",price[price$region==zip_sel&price$type=="TwoBedroom","avg"],sep="")
-#     #ThreeB_avg<-paste("3B: $",price[price$region==zip_sel&price$type=="ThreeBedroom","avg"],sep="")
-#     #FourB_avg<-paste("4B: $",price[price$region==zip_sel&price$type=="fOURbEDROOM","avg"],sep="")
-#     #transportation_rank<-paste("Transportation Rank: ",rank_all[rank_all$zipcode==zip_sel,"ranking.trans"],sep="")
-#     #amenities_rank<-paste("Amenities Rank: ",rank_all[rank_all$zipcode==zip_sel,"ranking.amenities"],sep="")
-#     #crime_rank<-paste("Crime Rank: ",rank_all[rank_all$zipcode==zip_sel,"ranking.crime"],sep="")
-# 
-#     
-#     leafletProxy("map1")%>%
-#       setView(click$lng,click$lat,zoom=14,options=list(animate=TRUE))
-#     
-#     leafletProxy("map")%>%
-#       setView(click$lng,click$lat,zoom=15,options=list(animate=TRUE))
-#     
-#     #output$zip_text<-renderText({zip})
-#     #output$avgprice_text<-renderText({price_avg})
-#     #output$avgstudio_text<-renderText({studio_avg})
-#     #output$avg1b_text<-renderText(({OneB_avg}))
-#     #output$avg2b_text<-renderText(({TwoB_avg}))
-#     #output$avg3b_text<-renderText(({ThreeB_avg}))
-#     #output$avg4b_text<-renderText(({FourB_avg}))
-#     #output$transportation_text<-renderText({transportation_rank})
-#     #output$amenities_text<-renderText({amenities_rank})
-#     #output$crime_text<-renderText({crime_rank})
-#     
-#   })
-#   
-#   ## Panel *: Return to big view##################################
-#   observeEvent(input$click_reset_buttom,{
-#     if(input$click_reset_buttom){
-#       leafletProxy("map1")%>%
-#         setView(lng = -73.98928, lat = 40.75042, zoom = 13)%>% 
-#         clearPopups()
-#       posi <<- NULL
-#       leafletProxy("map")%>%
-#         setView(-73.971035,40.775659,zoom=13,options=list(animate=TRUE))
-#       #####debug line#####
-#       #debug_posi <- paste(posi())
-#       #output$debug <- renderText({debug_posi})
-#     }
-#   })
+  posi <- NULL
+  output$map1 <- renderLeaflet({
+    leaflet()%>%
+      setView(lng = -73.98928, lat = 40.75042, zoom = 13)%>%
+      addProviderTiles("Stamen.TonerLite")
+    
+  })
+  
+  ## Panel *: heat map###########################################
+ 
+  
+  ## Panel *: click on any area, popup text about this zipcode area's information#########
+  #posi<-reactive({input$map1_shape_click})
+  observeEvent(input$Preference,{
+    p<- input$Preference
+    
+    proxy<-leafletProxy("map1")
+    if (p=="Crime"){
+      proxy%>%clearShapes()%>%clearControls()
+      proxy %>%
+        addPolygons(data=nyc, fillColor = ~pal(count), color = 'grey', weight = 1,
+                    fillOpacity = .6)%>%
+        addLegend(pal = pal, values = nyc$count,position="topright")
+    }
+    #else proxy%>%clearShapes()%>%clearControls()
+    else if(p=="Ave. rent"){
+      proxy%>%clearShapes()%>%clearControls()
+      proxy %>%
+        addPolygons(data=nycrent, fillColor = ~pal(count/2), color = 'grey', weight = 1,
+                    fillOpacity = .6)%>%
+        addLegend(pal = pal3, values = (nycrent$count/2),position="topright")
+    }
+    else if(p=="Market"){
+      proxy%>%clearShapes()%>%clearControls()
+      proxy %>%
+      addPolygons(data=nycmarket, fillColor = ~pal(count*10), color = 'grey', weight = 1,  
+                  fillOpacity = .6)%>%
+      addLegend(pal = pal2, values = (nycmarket$count)*10,position="topright")
+    }
+    else if(p=="Garage"){
+      proxy%>%clearShapes()%>%clearControls()
+      proxy %>%
+        addPolygons(data=nycparking, fillColor = ~pal(count*25), color = 'grey', weight = 1,  
+                    fillOpacity = .6)%>%
+        addLegend(pal = pal4, values = (nycparking$count*25),position="topright")
+    }
+    
+    
+})
+  
+  
+  observeEvent(input$Subway,{
+    p<-input$Subway
+    proxy<-leafletProxy("map")
+    
+    if(p==TRUE){
+      proxy %>% 
+        addMarkers(data=sub.station, ~lng, ~lat,label = ~info,icon=icons(
+          iconUrl = "../output/icons8-Bus-48.png",
+          iconWidth = 7, iconHeight = 7),group="subway")
+    }
+    else proxy%>%clearGroup(group="subway")
+    
+  })
+  
+  
+  
+  
+  
+  observeEvent(input$map1_shape_click, {
+    ## track
+    if(input$click_multi == FALSE) leafletProxy('map1') %>%clearGroup("click")
+    click <- input$map1_shape_click
+    posi <<- reactive({input$map1_shape_click})
+    #posi <<- reactiveV({input$map1_shape_click})
+    leafletProxy('map1')%>%
+      addMarkers(click$lng, click$lat, group="click", icon=list(iconUrl='icon/leaves.png',iconSize=c(60,60)))
+    
+    ##info
+    
+    #####*********#####
+    #zip_sel<-as.character(revgeocode(as.numeric(c(click$lng,click$lat)),output="more")$postal_code)
+    #zip<-paste("ZIPCODE: ",zip_sel)
+    #price_avg<-paste("Average Price: $",avg_price_zip.df[avg_price_zip.df$region==zip_sel,"value"],sep="")
+    #studio_avg<-paste("Studio: $",price[price$region==zip_sel&price$type=="Studio","avg"],sep="")
+    #OneB_avg<-paste("1B: $",price[price$region==zip_sel&price$type=="OneBedroom","avg"],sep="")
+    #TwoB_avg<-paste("2B: $",price[price$region==zip_sel&price$type=="TwoBedroom","avg"],sep="")
+    #ThreeB_avg<-paste("3B: $",price[price$region==zip_sel&price$type=="ThreeBedroom","avg"],sep="")
+    #FourB_avg<-paste("4B: $",price[price$region==zip_sel&price$type=="fOURbEDROOM","avg"],sep="")
+    #transportation_rank<-paste("Transportation Rank: ",rank_all[rank_all$zipcode==zip_sel,"ranking.trans"],sep="")
+    #amenities_rank<-paste("Amenities Rank: ",rank_all[rank_all$zipcode==zip_sel,"ranking.amenities"],sep="")
+    #crime_rank<-paste("Crime Rank: ",rank_all[rank_all$zipcode==zip_sel,"ranking.crime"],sep="")
+
+    
+    leafletProxy("map1")%>%
+      setView(click$lng,click$lat,zoom=14,options=list(animate=TRUE))
+    
+    leafletProxy("map")%>%
+      setView(click$lng,click$lat,zoom=15,options=list(animate=TRUE))
+    
+    #output$zip_text<-renderText({zip})
+    #output$avgprice_text<-renderText({price_avg})
+    #output$avgstudio_text<-renderText({studio_avg})
+    #output$avg1b_text<-renderText(({OneB_avg}))
+    #output$avg2b_text<-renderText(({TwoB_avg}))
+    #output$avg3b_text<-renderText(({ThreeB_avg}))
+    #output$avg4b_text<-renderText(({FourB_avg}))
+    #output$transportation_text<-renderText({transportation_rank})
+    #output$amenities_text<-renderText({amenities_rank})
+    #output$crime_text<-renderText({crime_rank})
+    
+  })
+  
+  ## Panel *: Return to big view##################################
+  observeEvent(input$click_reset_buttom,{
+    if(input$click_reset_buttom){
+      leafletProxy("map1")%>%
+        setView(lng = -73.98928, lat = 40.75042, zoom = 13)%>% 
+        clearPopups()
+      posi <<- NULL
+      leafletProxy("map")%>%
+        setView(-73.971035,40.775659,zoom=13,options=list(animate=TRUE))
+      #####debug line#####
+      #debug_posi <- paste(posi())
+      #output$debug <- renderText({debug_posi})
+    }
+  })
   
   ## Panel 1: to panel 2
   observeEvent(input$click_jump_next,{
