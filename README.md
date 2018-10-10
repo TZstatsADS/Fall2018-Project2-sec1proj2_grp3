@@ -7,7 +7,7 @@
 ![screenshot](doc/panel3.png)
 
 
-## House Renting Version 2.0 
+## Rent Smart Version 2.0 
 Term: Fall 2018
 
 + Team #3
