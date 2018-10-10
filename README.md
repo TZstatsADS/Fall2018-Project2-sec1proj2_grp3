@@ -12,11 +12,11 @@ Term: Fall 2018
 
 + Team #3
 + **Projec title**: [Rent Smart V2.0](https://taburiss3525.shinyapps.io/HousingM/)
-	+ Shilin Li
-	+ Zhengyang Xu 
-	+ Chenghao Yu
-	+ Mingyu Yang
-	+ Yang Yue
+	+ Shilin Li SL4261
+	+ Zhengyang Xu ZX2229
+	+ Chenghao Yu CY2474
+	+ Mingyu Yang MY2545
+	+ Yang Yue YY2826
 (Names are listed in alphabetical order of last names.)
 + **Project Summary**: 
 
