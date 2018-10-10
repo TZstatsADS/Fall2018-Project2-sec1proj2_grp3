@@ -773,7 +773,7 @@ shinyServer(function(input, output,session) {
     
     housing_sort=marksInBounds()
     housing_rank = subset(housing_rank, select=-c(X))
-    names(housing_rank) = c("zip", "price", "bedroom", "bathroom", "address", "restaurants(out of 5)", "store(out of 5)", "club&bar(out of 5)", "Transportation(out of 5)", "art&entertain(out of 5)")
+    names(housing_rank) = c("zip", "price", "bedroom", "bathroom", "address", "restaurants", "store", "club&bar", "Transportation", "art&entertain")
     output$filtered_data <- DT::renderDataTable({
       selected <- input$rank_rows_selected
       datatable(
