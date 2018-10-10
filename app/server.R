@@ -14,42 +14,42 @@ library(RColorBrewer)
 
 library(XML)
 library(DT)
-library(dplyr)
+#library(dplyr)
 library(tidyr)
-library(dplyr)
+#library(dplyr)
 library(ggplot2)
 
 #####
 #library(ggmap)
-#load("../output/price.RData")
-#load("../output/avg_price_zip.RData")
-#load("../output/subdat.RData")
-load("../output/nycmarket.Rdata")
-load("../output/nycrent.Rdata")
-load("../output/nycparking.Rdata")
-#rank_all <- read.csv("../data/rank_all.csv",as.is = T)
+#load("./output/price.RData")
+#load("./output/avg_price_zip.RData")
+#load("./output/subdat.RData")
+load("./output/nycmarket.RData")
+load("./output/nycrent.RData")
+load("./output/nycparking.RData")
+#rank_all <- read.csv("./data/rank_all.csv",as.is = T)
 ########
-load("../output/markets.RData")
-load("../output/sub.station.RData")
-load("../output/bus.stop.RData")
-load("../output/nyc.RData")
-load("../output/rank.Rdata")
-load("../output/rent.Rdata")
-load("../output/region_rent.Rdata")
-#load("../output/rank_all.Rdata")
-load("../output/restaurant.RData")
-housing_rank <- read.csv("../data/housing_rank.csv")
-museum <- read.csv("../data/museums.csv")
-theater <- read.csv("../data/theater.csv")
-market = read.csv("../data/market_dxy.csv",as.is = T)
+load("./output/markets.RData")
+load("./output/sub.station.RData")
+load("./output/bus.stop.RData")
+load("./output/nyc.RData")
+#load("./output/rank.RData")
+load("./output/rent.RData")
+load("./output/region_rent.RData")
+#load("./output/rank_all.RData")
+load("./output/restaurant.RData")
+housing_rank <- read.csv("./data/housing_rank.csv")
+museum <- read.csv("./data/museums.csv")
+theater <- read.csv("./data/theater.csv")
+market = read.csv("./data/market_dxy.csv",as.is = T)
 
-source("../lib/showPopupHover.R")
-source("../lib/ZillowApi.R")
+source("./lib/showPopupHover.R")
+source("./lib/ZillowApi.R")
 ##
-#source("../lib/revgeocode.R")
+#source("./lib/revgeocode.R")
 
 ##
-load("../output/housing.RData")
+load("./output/housing.RData")
 
 
 color <- list(color1 = c('#F2D7D5','#D98880', '#CD6155', '#C0392B', '#922B21','#641E16'),
@@ -68,23 +68,23 @@ pal4 <- colorBin(color[[1]], bins = bin4[[1]])
 shinyServer(function(input, output,session) {
   #################################################################
   ##### Panel 1 : summary  ########################################
-  #################################################################
+################################################################
   posi <- NULL
   output$map1 <- renderLeaflet({
     leaflet()%>%
       setView(lng = -73.98928, lat = 40.75042, zoom = 13)%>%
       addProviderTiles("Stamen.TonerLite")
-    
+
   })
-  
+
   ## Panel *: heat map###########################################
- 
-  
+
+
   ## Panel *: click on any area, popup text about this zipcode area's information#########
   #posi<-reactive({input$map1_shape_click})
   observeEvent(input$Preference,{
     p<- input$Preference
-    
+
     proxy<-leafletProxy("map1")
     if (p=="Crime"){
       proxy%>%clearShapes()%>%clearControls()
@@ -104,23 +104,23 @@ shinyServer(function(input, output,session) {
     else if(p=="Market"){
       proxy%>%clearShapes()%>%clearControls()
       proxy %>%
-      addPolygons(data=nycmarket, fillColor = ~pal(count*10), color = 'grey', weight = 1,  
+      addPolygons(data=nycmarket, fillColor = ~pal(count*10), color = 'grey', weight = 1,
                   fillOpacity = .6)%>%
       addLegend(pal = pal2, values = (nycmarket$count)*10,position="topright")
     }
     else if(p=="Garage"){
       proxy%>%clearShapes()%>%clearControls()
       proxy %>%
-        addPolygons(data=nycparking, fillColor = ~pal(count*25), color = 'grey', weight = 1,  
+        addPolygons(data=nycparking, fillColor = ~pal(count*25), color = 'grey', weight = 1,
                     fillOpacity = .6)%>%
         addLegend(pal = pal4, values = (nycparking$count*25),position="topright")
     }
-    
-    
+
+
 })
-  
-  
-  
+
+
+
   observeEvent(input$map1_shape_click, {
     ## track
     if(input$click_multi == FALSE) leafletProxy('map1') %>%clearGroup("click")
@@ -129,9 +129,9 @@ shinyServer(function(input, output,session) {
     #posi <<- reactiveV({input$map1_shape_click})
     leafletProxy('map1')%>%
       addMarkers(click$lng, click$lat, group="click", icon=list(iconUrl='icon/leaves.png',iconSize=c(60,60)))
-    
+
     ##info
-    
+
     #####*********#####
     #zip_sel<-as.character(revgeocode(as.numeric(c(click$lng,click$lat)),output="more")$postal_code)
     #zip<-paste("ZIPCODE: ",zip_sel)
@@ -145,13 +145,13 @@ shinyServer(function(input, output,session) {
     #amenities_rank<-paste("Amenities Rank: ",rank_all[rank_all$zipcode==zip_sel,"ranking.amenities"],sep="")
     #crime_rank<-paste("Crime Rank: ",rank_all[rank_all$zipcode==zip_sel,"ranking.crime"],sep="")
 
-    
+
     leafletProxy("map1")%>%
       setView(click$lng,click$lat,zoom=14,options=list(animate=TRUE))
-    
+
     leafletProxy("map")%>%
       setView(click$lng,click$lat,zoom=15,options=list(animate=TRUE))
-    
+
     #output$zip_text<-renderText({zip})
     #output$avgprice_text<-renderText({price_avg})
     #output$avgstudio_text<-renderText({studio_avg})
@@ -162,14 +162,14 @@ shinyServer(function(input, output,session) {
     #output$transportation_text<-renderText({transportation_rank})
     #output$amenities_text<-renderText({amenities_rank})
     #output$crime_text<-renderText({crime_rank})
-    
+
   })
-  
+
   ## Panel *: Return to big view##################################
   observeEvent(input$click_reset_buttom,{
     if(input$click_reset_buttom){
       leafletProxy("map1")%>%
-        setView(lng = -73.98928, lat = 40.75042, zoom = 13)%>% 
+        setView(lng = -73.98928, lat = 40.75042, zoom = 13)%>%
         clearPopups()
       posi <<- NULL
       leafletProxy("map")%>%
@@ -179,14 +179,14 @@ shinyServer(function(input, output,session) {
       #output$debug <- renderText({debug_posi})
     }
   })
-  
+
   ## Panel 1: to panel 2
   observeEvent(input$click_jump_next,{
     if(input$click_jump_next){
       updateTabsetPanel(session, "inTabset",selected = "Housing Explorer")
     }
   })
-  
+
     
   #Esri.WorldTopoMap
   #########main map######
@@ -459,7 +459,7 @@ shinyServer(function(input, output,session) {
     leafletProxy("map") %>%
       setView(lng=long, lat=lati,zoom=15)%>%
       addMarkers(lng=long,lat=lati,layerId = "1",icon=icons(
-        iconUrl = "../output/icons8-Location-50.png",iconWidth = 25, iconHeight = 25))
+        iconUrl = "./output/icons8-Location-50.png",iconWidth = 25, iconHeight = 25))
   })
   #################Clear Choices############
   observeEvent(input$button2,{
@@ -495,7 +495,7 @@ shinyServer(function(input, output,session) {
     if(p==TRUE){
       proxy %>% 
         addMarkers(data=sub.station, ~lng, ~lat,label = ~info,icon=icons(
-          iconUrl = "../output/icons8-Bus-48.png",
+          iconUrl = "./output/icons8-Bus-48.png",
           iconWidth = 7, iconHeight = 7),group="subway")
     }
     else proxy%>%clearGroup(group="subway")
@@ -510,7 +510,7 @@ shinyServer(function(input, output,session) {
     if(p==TRUE){
       proxy %>% 
         addMarkers(data=bus.stop, ~lng, ~lat,label = ~info,icon=icons(
-          iconUrl = "../output/icons8-Bus-48.png",
+          iconUrl = "./output/icons8-Bus-48.png",
           iconWidth = 7, iconHeight = 7),layerId=as.character(bus.stop$info))
     }
     else proxy%>%removeMarker(layerId=as.character(bus.stop$info))
@@ -525,7 +525,7 @@ shinyServer(function(input, output,session) {
     if(p==TRUE){
       proxy%>%
         addMarkers(lat=markets$latitude, lng=markets$longitude,icon=icons(
-          iconUrl = "../output/icons8-Shopping Cart-48.png",
+          iconUrl = "./output/icons8-Shopping Cart-48.png",
           iconWidth = 7, iconHeight = 7, shadowWidth = 7, shadowHeight = 7),layerId=as.character(markets$License.Number))
     }
     else{
@@ -620,7 +620,7 @@ shinyServer(function(input, output,session) {
     if(p==TRUE){
       proxy%>%
         addMarkers(lat=restaurant$lat, lng=restaurant$lon,icon=icons(
-          iconUrl = "../output/icons8-French Fries-96.png",
+          iconUrl = "./output/icons8-French Fries-96.png",
           iconWidth = 7, iconHeight = 7, shadowWidth = 7, shadowHeight = 7),layerId=as.character(restaurant$CAMIS))
     }
     else{
@@ -701,7 +701,7 @@ shinyServer(function(input, output,session) {
   #   if(p==TRUE){
   #     proxy %>%
   #       addMarkers(data=bus.stop, ~lng, ~lat,label = ~info,icon=icons(
-  #         iconUrl = "../output/icons8-Bus-48.png",
+  #         iconUrl = "./output/icons8-Bus-48.png",
   #         iconWidth = 7, iconHeight = 7),layerId=as.character(bus.stop$info))
   #   }
   #   else proxy%>%removeMarker(layerId=as.character(bus.stop$info))
@@ -808,10 +808,10 @@ shinyServer(function(input, output,session) {
   
   
   # #Reviews Image
-  # image1 <- sprintf("data:image/png;base64,%s", base64encode("../app/star1.png"))
-  # image2 <- sprintf("data:image/png;base64,%s", base64encode("../app/star2.png"))
-  # image3 <- sprintf("data:image/png;base64,%s", base64encode("../app/star3.png"))
-  # image4 <- sprintf("data:image/png;base64,%s", base64encode("../app/star4.png"))
+  # image1 <- sprintf("data:image/png;base64,%s", base64encode("./app/star1.png"))
+  # image2 <- sprintf("data:image/png;base64,%s", base64encode("./app/star2.png"))
+  # image3 <- sprintf("data:image/png;base64,%s", base64encode("./app/star3.png"))
+  # image4 <- sprintf("data:image/png;base64,%s", base64encode("./app/star4.png"))
   # 
   # carr_select <- function(x= c()){
   #   y <- c()

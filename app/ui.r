@@ -30,7 +30,7 @@ shinyUI(
                                     leafletOutput("map1", width = "100%", height = "100%"),
                                     absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE, draggable = FALSE,
                                                   top = 80, left = 10, height = "auto",width = 243,
-                                                  
+
                                                   h3("Select Features",align="center"),
                                                   #checkboxInput("Crime", label = "Crime",value= T),
                                                   #checkboxInput("Ave_rent", label = "Ave. rent", value = F ),
@@ -58,7 +58,7 @@ shinyUI(
                                                   #h4(textOutput("transportation_text"),align="left"),
                                                   #h4(textOutput("amenities_text"),align="left"),
                                                   #h4(textOutput("crime_text"),align="left"),
-                                                  
+
                                                   # ######debug line#####
                                                   # h4(textOutput("debug"),align="left")
                                                   # ,
@@ -68,10 +68,10 @@ shinyUI(
                                                   actionButton("click_jump_next","Check community details"),
                                                   hr(),
                                                   checkboxInput("click_multi","Show Your Trace", value = T)
-                                                  
-                                                  
+
+
                                     ))
-                                
+
                        ),
                        ##################################2.2map###########################################
                        
