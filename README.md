@@ -22,7 +22,7 @@ Term: Fall 2018
 + **Project Summary**: 
 
 
-We updated the app "Rent Smart" developed by previous students. The main purpose of the app is to recommend housing to renters. We take crime rate, restaurant numbers and type, transportation, numbers of market, and number of bathroom and bedroom into consideration.   
+We updated the app "Rent Smart" developed by group 3 students from spring 2018 (https://github.com/TZstatsADS/Spring2018-Project2-Group3). The main purpose of the app is to recommend housing to renters. We take crime rate, restaurant numbers and type, transportation, numbers of market, and number of bathroom and bedroom into consideration.   
 
 In the first panel, for a clearer visualization, we showcase a heat map for each of the factors including average price, numbers of market, crime rate, garage and transportation. We also add in a feature where one could select a neighborhood and be taken to the second panel where the data presented only includes properties in that specific neighborhood. We integerated informations of the previous "Dot Position" panel into the first and third panel. In the second housing recommendation panel, instead of recommending an area to rent, we add in data to recommend specific properties. Filters are changed to make recommendations on more relevant information. Once properties are selected on the second panel, a visualization for comparison between these properties are shown in the third compare panel. We includes dot details for restaurant, museum and theater in the second panel map. For the third panel, the previous app uses bar charts that are often too crowded and hard for non-professionals to look at. We here include basic informations in a table format that we believe are easier to understand. 
 
