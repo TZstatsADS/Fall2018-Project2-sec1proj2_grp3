@@ -12,7 +12,7 @@ Term: Fall 2018
 
 + Team #3
 + **Projec title**: [Rent Smart V2.0](https://taburiss3525.shinyapps.io/HousingM/)  
-[Presentation](https//prezi.com/view/XJk5oUjxWrj9Je7nsaQu/)
+[Presentation](https://prezi.com/view/XJk5oUjxWrj9Je7nsaQu/)
 	+ Shilin Li SL4261
 	+ Zhengyang Xu ZX2229
 	+ Chenghao Yu CY2474
