@@ -20,14 +20,14 @@ library(dplyr)
 library(ggplot2)
 
 #####
-library(ggmap)
-load("../output/price.RData")
-load("../output/avg_price_zip.RData")
-load("../output/subdat.RData")
+#library(ggmap)
+#load("../output/price.RData")
+#load("../output/avg_price_zip.RData")
+#load("../output/subdat.RData")
 load("../output/nycmarket.Rdata")
 load("../output/nycrent.Rdata")
 load("../output/nycparking.Rdata")
-rank_all <- read.csv("../data/rank_all.csv",as.is = T)
+#rank_all <- read.csv("../data/rank_all.csv",as.is = T)
 ########
 load("../output/markets.RData")
 load("../output/sub.station.RData")
@@ -120,23 +120,6 @@ shinyServer(function(input, output,session) {
 })
   
   
-  observeEvent(input$Subway,{
-    p<-input$Subway
-    proxy<-leafletProxy("map")
-    
-    if(p==TRUE){
-      proxy %>% 
-        addMarkers(data=sub.station, ~lng, ~lat,label = ~info,icon=icons(
-          iconUrl = "../output/icons8-Bus-48.png",
-          iconWidth = 7, iconHeight = 7),group="subway")
-    }
-    else proxy%>%clearGroup(group="subway")
-    
-  })
-  
-  
-  
-  
   
   observeEvent(input$map1_shape_click, {
     ## track
@@ -207,9 +190,9 @@ shinyServer(function(input, output,session) {
     
   #Esri.WorldTopoMap
   #########main map######
-  #output$map <- renderLeaflet({
+  # output$map <- renderLeaflet({
   #  leaflet() %>%
-  #    setView(lng = -73.971035, 
+  #    setView(lng = -73.971035,
   #            lat = 40.775659 , zoom = 13) %>%
   #    addProviderTiles("Stamen.TonerLite")%>%
   #    addMarkers(data=housing,
@@ -221,7 +204,7 @@ shinyServer(function(input, output,session) {
   output$map <- renderLeaflet({
     if(is.null(posi)){
     leaflet() %>%
-      setView(lng = -73.971035, 
+      setView(lng = -73.971035,
               lat = 40.775659 , zoom = 13) %>%
       #setView(lng = posi2lng, lat = posi2lat, zoom = 12) %>%
       addProviderTiles("Stamen.TonerLite")%>%
@@ -231,7 +214,7 @@ shinyServer(function(input, output,session) {
                clusterOptions=markerClusterOptions(),
                group="housing_cluster")}
     else{leaflet() %>%
-      
+
         setView(lng = posi()$lng, lat = posi()$lat, zoom = 15) %>%
         addProviderTiles("Stamen.TonerLite")%>%
         addMarkers(data=housing,
@@ -239,7 +222,7 @@ shinyServer(function(input, output,session) {
                    lat=~lat,
                    clusterOptions=markerClusterOptions(),
                    group="housing_cluster")}
-               
+
     })
   
   
@@ -490,6 +473,9 @@ shinyServer(function(input, output,session) {
                  clusterOptions=markerClusterOptions(),
                  group="housing_cluster")
     updateTextInput(session, inputId="location", value = "")
+    updateSelectInput(session, "restaurant_type1", selected =  "")
+    updateSelectInput(session, "market_type", selected =  "")
+    
   }
   
   )
@@ -548,9 +534,6 @@ shinyServer(function(input, output,session) {
     }
   })
   
-  observeEvent(input$button2, {
-    updateSelectInput(session, "market_type", selected =  "")
-  })
   
   observeEvent(input$market_type, {
     if("Pharmacy" %in% input$market_type) leafletProxy("map") %>% showGroup("pha")
@@ -559,6 +542,65 @@ shinyServer(function(input, output,session) {
     else{leafletProxy("map") %>% hideGroup("gro")}
   }, ignoreNULL = FALSE)
   
+  observeEvent(input$restaurant_type1, {
+    
+    leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Chinese'),]) %>%
+      addCircleMarkers(~lon,~lat,color = "#FFEC5C", popup = ~paste("Name:",restaurant$DBA,"<br/>",
+                                                                   "Tel:",restaurant$PHONE,"<br/>",
+                                                                   "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
+                                                                   "Address:",restaurant$geoAddress), stroke = FALSE, fillOpacity = 0.5,radius = 5, group  = "chin")
+    # leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'American'),]) %>%
+    #   addCircleMarkers(~lon,~lat,color = "#C8000A", popup = ~paste("Name:",restaurant$DBA,"<br/>",
+    #                                                                "Tel:",restaurant$PHONE,"<br/>",
+    #                                                                "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
+    #                                                                "Address:",restaurant$geoAddress),stroke = FALSE, fillOpacity = 0.5,radius = 5, group = "amer")
+    leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Italian'),]) %>%
+      addCircleMarkers(~lon,~lat,color = "#F9BA32", popup = ~paste("Name:",restaurant$DBA,"<br/>",
+                                                                   "Tel:",restaurant$PHONE,"<br/>",
+                                                                   "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
+                                                                   "Address:",restaurant$geoAddress),stroke = FALSE, fillOpacity = 0.5,radius = 5,  group = "ita")
+    leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Japanese'),]) %>%
+      addCircleMarkers(~lon,~lat,color = "#D35C37", popup = ~paste("Name:",restaurant$DBA,"<br/>",
+                                                                   "Tel:",restaurant$PHONE,"<br/>",
+                                                                   "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
+                                                                   "Address:",restaurant$geoAddress),stroke = FALSE, fillOpacity = 0.5,radius = 5,  group = "jap")
+    # leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Pizza'),]) %>%
+    #   addCircleMarkers(~lon,~lat,color = "#E8A735", popup = ~paste("Name:",restaurant$DBA,"<br/>",
+    #                                                                "Tel:",restaurant$PHONE,"<br/>",
+    #                                                                "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
+    #                                                                "Address:",restaurant$geoAddress),stroke = FALSE, fillOpacity = 0.5,radius = 5,  group = "piz")
+    # leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Others'),]) %>%
+    #   addCircleMarkers(~lon,~lat,popup = ~paste("Name:",restaurant$DBA,"<br/>",
+    #                                             "Tel:",restaurant$PHONE,"<br/>",
+    #                                             "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
+    #                                             "Address:",restaurant$geoAddress), color = "#E2C499", stroke = FALSE, fillOpacity = 0.5,radius = 5,  group = "oth")
+    # leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Cafe'),]) %>%
+    #   addCircleMarkers(~lon,~lat,popup = ~paste("Name:",restaurant$DBA,"<br/>",
+    #                                             "Tel:",restaurant$PHONE,"<br/>",
+    #                                             "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
+    #                                             "Address:",restaurant$geoAddress), color = "#E2C499", stroke = FALSE, fillOpacity = 0.5,radius = 5,  group = "caf")
+    # 
+    
+  })
+  
+ 
+  # food
+  observeEvent(input$restaurant_type1, {
+    if("Chinese" %in% input$restaurant_type1) leafletProxy("map") %>% showGroup("chin")
+    else{leafletProxy("map") %>% hideGroup("chin")}
+    # if("American" %in% input$restaurant_type1) leafletProxy("map") %>% showGroup("amer")
+    # else{leafletProxy("map") %>% hideGroup("amer")}
+    if("Italian" %in% input$restaurant_type1) leafletProxy("map") %>% showGroup("ita")
+    else{leafletProxy("map") %>% hideGroup("ita")}
+    if("Japanese" %in% input$restaurant_type1) leafletProxy("map") %>% showGroup("jap")
+    else{leafletProxy("map") %>% hideGroup("jap")}
+    # if("Pizza" %in% input$restaurant_type1) leafletProxy("map") %>% showGroup("piz")
+    # else{leafletProxy("map") %>% hideGroup("piz")}
+    # if("Cafe" %in% input$restaurant_type1) leafletProxy("map") %>% showGroup("caf")
+    # else{leafletProxy("map") %>% hideGroup("caf")}
+    # if("Others" %in% input$restaurant_type1) leafletProxy("map") %>% showGroup("oth")
+    # else{leafletProxy("map") %>% hideGroup("oth")}
+  }, ignoreNULL = FALSE)
   
   
   observeEvent(input$market_type,{leafletProxy("map", data = market[which(market$type == 'Pharmacy'),]) %>%
@@ -590,114 +632,46 @@ shinyServer(function(input, output,session) {
   
   
   ##clear all
-  observeEvent(input$button2, {
-    updateSelectInput(session, "restaurant_type", selected =  "")
-  })
-  # 
-  # leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Chinese'),]) %>%
-  #   addMarkers(~lon,~lat, icon=icons(
-  #             iconUrl = "../output/icons8-china-100.PNG",
-  #             iconWidth = 10, iconHeight = 10, shadowWidth = 10, shadowHeight = 10),popup = paste("Name:",restaurant$DBA,"<br/>",
-  #                                                                                                 "Tel:",restaurant$PHONE,"<br/>",
-  #                                                                                                 "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
-  #                                                                                                 "Address:",restaurant$geoAddress),  group  = "chin")
-  # leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'American'),]) %>%
-  #   addMarkers(~lon,~lat, icon=icons(
-  #     iconUrl = "../output/icons8-usa-96.PNG",
-  #     iconWidth = 10, iconHeight = 10, shadowWidth = 10, shadowHeight = 10),popup = paste("Name:",restaurant$DBA,"<br/>",
-  #                                                                                         "Tel:",restaurant$PHONE,"<br/>",
-  #                                                                                         "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
-  #                                                                                         "Address:",restaurant$geoAddress), group = "amer")
-  # leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Italian'),]) %>%
-  #   addMarkers(~lon,~lat, icon=icons(
-  #     iconUrl = "../output/icons8-italy-96.PNG",
-  #     iconWidth = 10, iconHeight = 10, shadowWidth = 10, shadowHeight = 10),popup = paste("Name:",restaurant$DBA,"<br/>",
-  #                                                                                         "Tel:",restaurant$PHONE,"<br/>",
-  #                                                                                         "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
-  #                                                                                         "Address:",restaurant$geoAddress),  group = "ita")
-  # leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Japanese'),]) %>%
-  #   addMarkers(~lon,~lat, icon=icons(
-  #     iconUrl = "../output/icons8-japan-96.PNG",
-  #     iconWidth = 10, iconHeight = 10, shadowWidth = 10, shadowHeight = 10),popup = paste("Name:",restaurant$DBA,"<br/>",
-  #                                                                                         "Tel:",restaurant$PHONE,"<br/>",
-  #                                                                                         "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
-  #                                                                                         "Address:",restaurant$geoAddress),  group = "jap")
-  # leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Pizza'),]) %>%
-  #   addMarkers(~lon,~lat, icon=icons(
-  #     iconUrl = "../output/icons8-pizza-96.PNG",
-  #     iconWidth = 10, iconHeight = 10, shadowWidth = 10, shadowHeight = 10),popup = paste("Name:",restaurant$DBA,"<br/>",
-  #                                                                                         "Tel:",restaurant$PHONE,"<br/>",
-  #                                                                                         "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
-  #                                                                                         "Address:",restaurant$geoAddress),  group = "piz")
-  # leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Others'),]) %>%
-  #   addMarkers(~lon,~lat, icon=icons(
-  #     iconUrl = "../output/icons8-restaurant-96.PNG",
-  #     iconWidth = 10, iconHeight = 10, shadowWidth = 10, shadowHeight = 10),popup = paste("Name:",restaurant$DBA,"<br/>",
-  #                                                                                         "Tel:",restaurant$PHONE,"<br/>",
-  #                                                                                         "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
-  #                                                                                         "Address:",restaurant$geoAddress),  group = "oth")
-  # leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Cafe'),]) %>%
-  #   addMarkers(~lon,~lat, icon=icons(
-  #     iconUrl = "../output/icons8-cafe-96.PNG",
-  #     iconWidth = 10, iconHeight = 10, shadowWidth = 10, shadowHeight = 10),popup = paste("Name:",restaurant$DBA,"<br/>",
-  #                                                                                         "Tel:",restaurant$PHONE,"<br/>",
-  #                                                                                         "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
-  #                                                                                         "Address:",restaurant$geoAddress), group = "caf")
-  leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Chinese'),]) %>%
-    addCircleMarkers(~lon,~lat,color = "#FFEC5C", popup = ~paste("Name:",restaurant$DBA,"<br/>",
-                                                                 "Tel:",restaurant$PHONE,"<br/>",
-                                                                 "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
-                                                                 "Address:",restaurant$geoAddress), stroke = FALSE, fillOpacity = 0.5,radius = 5, group  = "chin")
-  leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'American'),]) %>%
-    addCircleMarkers(~lon,~lat,color = "#C8000A", popup = ~paste("Name:",restaurant$DBA,"<br/>",
-                                                                 "Tel:",restaurant$PHONE,"<br/>",
-                                                                 "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
-                                                                 "Address:",restaurant$geoAddress),stroke = FALSE, fillOpacity = 0.5,radius = 5, group = "amer")
-  leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Italian'),]) %>%
-    addCircleMarkers(~lon,~lat,color = "#F9BA32", popup = ~paste("Name:",restaurant$DBA,"<br/>",
-                                                                 "Tel:",restaurant$PHONE,"<br/>",
-                                                                 "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
-                                                                 "Address:",restaurant$geoAddress),stroke = FALSE, fillOpacity = 0.5,radius = 5,  group = "ita")
-  leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Japanese'),]) %>%
-    addCircleMarkers(~lon,~lat,color = "#D35C37", popup = ~paste("Name:",restaurant$DBA,"<br/>",
-                                                                 "Tel:",restaurant$PHONE,"<br/>",
-                                                                 "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
-                                                                 "Address:",restaurant$geoAddress),stroke = FALSE, fillOpacity = 0.5,radius = 5,  group = "jap")
-  leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Pizza'),]) %>%
-    addCircleMarkers(~lon,~lat,color = "#E8A735", popup = ~paste("Name:",restaurant$DBA,"<br/>",
-                                                                 "Tel:",restaurant$PHONE,"<br/>",
-                                                                 "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
-                                                                 "Address:",restaurant$geoAddress),stroke = FALSE, fillOpacity = 0.5,radius = 5,  group = "piz")
-  leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Others'),]) %>%
-    addCircleMarkers(~lon,~lat,popup = ~paste("Name:",restaurant$DBA,"<br/>",
-                                              "Tel:",restaurant$PHONE,"<br/>",
-                                              "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
-                                              "Address:",restaurant$geoAddress), color = "#E2C499", stroke = FALSE, fillOpacity = 0.5,radius = 5,  group = "oth")
-  leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Cafe'),]) %>%
-    addCircleMarkers(~lon,~lat,popup = ~paste("Name:",restaurant$DBA,"<br/>",
-                                              "Tel:",restaurant$PHONE,"<br/>",
-                                              "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
-                                              "Address:",restaurant$geoAddress), color = "#E2C499", stroke = FALSE, fillOpacity = 0.5,radius = 5,  group = "caf")
   
-  
-  ## food
-  observeEvent(input$restaurant_type, {
-    if("Chinese" %in% input$restaurant_type) leafletProxy("map") %>% showGroup("chin")
-    else{leafletProxy("map") %>% hideGroup("chin")}
-    if("American" %in% input$restaurant_type) leafletProxy("map") %>% showGroup("amer")
-    else{leafletProxy("map") %>% hideGroup("amer")}
-    if("Italian" %in% input$restaurant_type) leafletProxy("map") %>% showGroup("ita")
-    else{leafletProxy("map") %>% hideGroup("ita")}
-    if("Japanese" %in% input$restaurant_type) leafletProxy("map") %>% showGroup("jap")
-    else{leafletProxy("map") %>% hideGroup("jap")}
-    if("Pizza" %in% input$restaurant_type) leafletProxy("map") %>% showGroup("piz")
-    else{leafletProxy("map") %>% hideGroup("piz")}
-    if("Cafe" %in% input$restaurant_type) leafletProxy("map") %>% showGroup("caf")
-    else{leafletProxy("map") %>% hideGroup("caf")}
-    if("Others" %in% input$restaurant_type) leafletProxy("map") %>% showGroup("oth")
-    else{leafletProxy("map") %>% hideGroup("oth")}
-  }, ignoreNULL = FALSE)
-  
+ # leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Chinese'),]) %>%
+ #    addCircleMarkers(~lon,~lat,color = "#FFEC5C", popup = ~paste("Name:",restaurant$DBA,"<br/>",
+ #                                                                 "Tel:",restaurant$PHONE,"<br/>",
+ #                                                                 "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
+ #                                                                 "Address:",restaurant$geoAddress), stroke = FALSE, fillOpacity = 0.5,radius = 5, group  = "chin")
+ #  leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'American'),]) %>%
+ #    addCircleMarkers(~lon,~lat,color = "#C8000A", popup = ~paste("Name:",restaurant$DBA,"<br/>",
+ #                                                                 "Tel:",restaurant$PHONE,"<br/>",
+ #                                                                 "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
+ #                                                                 "Address:",restaurant$geoAddress),stroke = FALSE, fillOpacity = 0.5,radius = 5, group = "amer")
+ #  leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Italian'),]) %>%
+ #    addCircleMarkers(~lon,~lat,color = "#F9BA32", popup = ~paste("Name:",restaurant$DBA,"<br/>",
+ #                                                                 "Tel:",restaurant$PHONE,"<br/>",
+ #                                                                 "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
+ #                                                                 "Address:",restaurant$geoAddress),stroke = FALSE, fillOpacity = 0.5,radius = 5,  group = "ita")
+ #  leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Japanese'),]) %>%
+ #    addCircleMarkers(~lon,~lat,color = "#D35C37", popup = ~paste("Name:",restaurant$DBA,"<br/>",
+ #                                                                 "Tel:",restaurant$PHONE,"<br/>",
+ #                                                                 "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
+ #                                                                 "Address:",restaurant$geoAddress),stroke = FALSE, fillOpacity = 0.5,radius = 5,  group = "jap")
+ #  leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Pizza'),]) %>%
+ #    addCircleMarkers(~lon,~lat,color = "#E8A735", popup = ~paste("Name:",restaurant$DBA,"<br/>",
+ #                                                                 "Tel:",restaurant$PHONE,"<br/>",
+ #                                                                 "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
+ #                                                                 "Address:",restaurant$geoAddress),stroke = FALSE, fillOpacity = 0.5,radius = 5,  group = "piz")
+ #  leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Others'),]) %>%
+ #    addCircleMarkers(~lon,~lat,popup = ~paste("Name:",restaurant$DBA,"<br/>",
+ #                                              "Tel:",restaurant$PHONE,"<br/>",
+ #                                              "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
+ #                                              "Address:",restaurant$geoAddress), color = "#E2C499", stroke = FALSE, fillOpacity = 0.5,radius = 5,  group = "oth")
+ #  leafletProxy("map", data = restaurant[which(restaurant$CUISINE.DESCRIPTION == 'Cafe'),]) %>%
+ #    addCircleMarkers(~lon,~lat,popup = ~paste("Name:",restaurant$DBA,"<br/>",
+ #                                              "Tel:",restaurant$PHONE,"<br/>",
+ #                                              "Zipcode:",restaurant$ZIPCODE,"<br/>" ,# warning appears
+ #                                              "Address:",restaurant$geoAddress), color = "#E2C499", stroke = FALSE, fillOpacity = 0.5,radius = 5,  group = "caf")
+ #  
+ #  
+ # 
+ #  
   
   
   
@@ -789,7 +763,6 @@ shinyServer(function(input, output,session) {
   ##########################################################################
   ## Panel 3: compare ######################################################
   ########################################################################## 
-  
   observeEvent(input$click_jump_next1,{
     if(input$click_jump_next1){
       updateTabsetPanel(session, "inTabset",selected = "Compare")
@@ -799,15 +772,39 @@ shinyServer(function(input, output,session) {
   observe({
     
     housing_sort=marksInBounds()
+    housing_rank = subset(housing_rank, select=-c(X))
+    names(housing_rank) = c("zip", "price", "bedroom", "bathroom", "address", "restaurants(out of 5)", "store(out of 5)", "club&bar(out of 5)", "Transportation(out of 5)", "art&entertain(out of 5)")
     output$filtered_data <- DT::renderDataTable({
       selected <- input$rank_rows_selected
-      if(is.null(selected)){
-        housing_rank
-      } else {
-        housing_rank[housing_rank$addr %in% housing_sort$addr[selected], ]
-      }
+      datatable(
+        if(is.null(selected)){
+          housing_rank
+        } else {
+          housing_rank[housing_rank$addr %in% housing_sort$addr[selected], ]
+        }, rownames= FALSE)
     })
   })
+  
+  
+  
+  # observeEvent(input$click_jump_next1,{
+  #   if(input$click_jump_next1){
+  #     updateTabsetPanel(session, "inTabset",selected = "Compare")
+  #   }
+  # })
+  # 
+  # observe({
+  #   
+  #   housing_sort=marksInBounds()
+  #   output$filtered_data <- DT::renderDataTable({
+  #     selected <- input$rank_rows_selected
+  #     if(is.null(selected)){
+  #       housing_rank
+  #     } else {
+  #       housing_rank[housing_rank$addr %in% housing_sort$addr[selected], ]
+  #     }
+  #   })
+  # })
   
   
   # #Reviews Image

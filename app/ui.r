@@ -19,12 +19,12 @@ shinyUI(
   
   
   fluidPage(includeCSS("style.css"),
-            navbarPage(p(class="h","Manhattan Off-Campus Housing"),id = "inTabset",
+            navbarPage(p(class="h","Rent Smart V2.0"),id = "inTabset",
                        #theme=shinythemes::shinytheme("spacelab"),
                        fluid=T,
                        
                        #####################################1. Home##############################################           
-                       tabPanel("All about map",
+                       tabPanel("All about map",icon=icon("home"),
                                 div(class="outer",
                                     tags$style(type = "text/css", ".outer {position: fixed; top: 41px; left: 0; right: 0; bottom: 0; overflow: hidden; padding: 0}"),
                                     leafletOutput("map1", width = "100%", height = "100%"),
@@ -59,9 +59,9 @@ shinyUI(
                                                   #h4(textOutput("amenities_text"),align="left"),
                                                   #h4(textOutput("crime_text"),align="left"),
                                                   
-                                                  ######debug line#####
-                                                  h4(textOutput("debug"),align="left")
-                                                  ,
+                                                  # ######debug line#####
+                                                  # h4(textOutput("debug"),align="left")
+                                                  # ,
                                                   #hr(),
                                                   #h5("Next step",align="center"),
                                                   actionButton("click_reset_buttom", "Reset"),
@@ -84,8 +84,8 @@ shinyUI(
                                     column(3,
                                            h1("Compare Places You Select"),
                                            fluidRow(
-                                             column(2,
-                                                    div(id = "action",actionButton("no_rec2", "Reset"))),
+                                             # column(2,
+                                             #        div(id = "action",actionButton("no_rec2", "Reset"))),
                                              column(1,offset = 2,
                                                     div(actionButton("click_jump_next1","Select & Compare"))
                                              ))),
@@ -138,8 +138,15 @@ shinyUI(
                                            style="margin-top: 25px;display:inline-block;margin-right: 10px;margin-left: 10px",
                                            dropdownButton(circle = FALSE,
                                                           label="Restaurant", status = "default",
-                                                          selectInput("restaurant_type","Restaurant type",
-                                                                      c("Food I Like"="",list("Chinese","American","Italian","Japanese", "Pizza","Cafe", "Others")), multiple=TRUE))
+                                                          selectInput("restaurant_type1","Restaurant type",
+                                                                      c("Food I Like"="",list("Chinese",
+                                                                                              # "American",
+                                                                                               "Italian",
+                                                                                               "Japanese"
+                                                                                              #  "Pizza",
+                                                                                              # "Cafe", 
+                                                                                              # "Others"
+                                                                                              )), multiple=TRUE))
                                     ),
                                     
                                     column(width=1,
@@ -208,12 +215,18 @@ shinyUI(
                        
                        #### 3.Compare########################################33
                        
-                       tabPanel("Compare",
+                       # tabPanel("Compare",
+                       #          DT::dataTableOutput("filtered_data")
+                       # ),
+                       tabPanel("Compare",icon=icon("compass"),
+                                column(4,offset = 5, h1(id="big-heading", "Detail Comparison (rating out of 5)")),
+                                
                                 DT::dataTableOutput("filtered_data")
                        ),
                        
                        ##### 4.contact##########
-                       tabPanel(title = "Contact", img(src="contact.png", height = "100%", width = "100%"))
+                       tabPanel(title = "Contact", icon=icon("address-book"),
+                                img(src="contact.png", height = "100%", width = "100%"))
                        # tabPanel(title='Home', 
                        #          icon=icon('home'),
                        #          div(id='NY'),
